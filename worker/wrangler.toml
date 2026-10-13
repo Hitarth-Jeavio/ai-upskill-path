@@ -1,0 +1,17 @@
+name = "ai-upskill-path"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+# Your GitHub Pages origin, without a path. Add http://localhost:8080 for local testing.
+ALLOWED_ORIGINS = "https://hitarth-jeavio.github.io,http://localhost:8080"
+# The generator turns itself off after this time, so the key only works on the day.
+EXPIRES_AT = "2026-10-30T18:30:00Z"
+# gpt-6.1-sol balances quality and cost; gpt-6-astra is the top tier (~5x the price).
+MODEL = "gpt-6.1-sol"
+REASONING_EFFORT = "low"
+MAX_OUTPUT_TOKENS = "16000"
+
+# Secrets: set these with `npx wrangler secret put <NAME>`, never in this file.
+#   OPENAI_API_KEY
+#   EVENT_CODE   (optional; shown on the session slide or baked into the QR link)
