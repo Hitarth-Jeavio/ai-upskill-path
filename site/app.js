@@ -1,7 +1,10 @@
 import { FIELDS, EXPOSURE, SPECIALIZATIONS, STAGES, REQUIRED, normalizeProfile, computeStage, labelOf } from "./questions.js";
-import { buildFullPrompt } from "./prompt.js";
+import { buildFullPrompt, resolveVersion } from "./prompt.js";
 
 const WORKER_URL = (window.APP_CONFIG?.WORKER_URL || "").replace(/\/$/, "");
+// ?v=1 or ?v=v2 overrides config.js, e.g. to compare prompt versions side by side.
+const urlVersion = new URLSearchParams(location.search).get("v");
+const PROMPT_VERSION = resolveVersion(urlVersion ? `v${urlVersion.replace(/^v/i, "")}` : window.APP_CONFIG?.PROMPT_VERSION);
 const STORE_KEY = "ai-upskill-answers";
 const CODE_KEY = "ai-upskill-code";
 const COLORS = ["var(--orange)", "var(--teal)", "var(--green)", "var(--yellow)"];
@@ -207,6 +210,11 @@ function enhance(frag) {
     }
     (body || out).append(node);
   }
+  out.querySelectorAll("table").forEach((t) => {
+    const wrap = el("div", { className: "table-scroll" });
+    t.before(wrap);
+    wrap.append(t);
+  });
   out.querySelectorAll(".tl-body a[href], blockquote a[href]").forEach((a) => {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
@@ -236,7 +244,7 @@ function setStatus(msg, isError = false) {
 }
 
 function showFallback(profile, open = false) {
-  $("#fallbackText").value = buildFullPrompt(profile);
+  $("#fallbackText").value = buildFullPrompt(profile, PROMPT_VERSION);
   $("#fallback").hidden = false;
   $("#fallback").open = open;
 }
@@ -271,7 +279,7 @@ async function generate(profile) {
     const res = await fetch(`${WORKER_URL}/generate`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ profile, eventCode: $("#eventCode").value }),
+      body: JSON.stringify({ profile, eventCode: $("#eventCode").value, promptVersion: PROMPT_VERSION }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -358,7 +366,7 @@ function init() {
     showResult(profile);
     setStatus(WORKER_URL ? "" : "Paste the prompt into ChatGPT, Claude or Gemini to get your path.");
     showFallback(profile, true);
-    const ok = await copyText(buildFullPrompt(profile), "Prompt copied. Paste it into ChatGPT, Claude or Gemini.");
+    const ok = await copyText(buildFullPrompt(profile, PROMPT_VERSION), "Prompt copied. Paste it into ChatGPT, Claude or Gemini.");
     if (!ok) $("#fallbackText").select();
   });
 

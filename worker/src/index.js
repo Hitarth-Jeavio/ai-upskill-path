@@ -1,5 +1,5 @@
 import { normalizeProfile } from "../../site/questions.js";
-import { SYSTEM_PROMPT, buildUserPrompt } from "../../site/prompt.js";
+import { getSystemPrompt, resolveVersion, buildUserPrompt } from "../../site/prompt.js";
 
 const json = (body, status, cors) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...cors } });
@@ -34,13 +34,14 @@ export default {
 
     const { profile, missing } = normalizeProfile(body.profile);
     if (missing.length) return json({ error: `Missing: ${missing.join(", ")}` }, 400, cors);
+    const version = resolveVersion(body.promptVersion);
 
     const upstream = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: { "content-type": "application/json", authorization: `Bearer ${env.OPENAI_API_KEY}` },
       body: JSON.stringify({
         model: env.MODEL || "gpt-6.1-sol",
-        instructions: SYSTEM_PROMPT,
+        instructions: getSystemPrompt(version),
         input: buildUserPrompt(profile),
         stream: true,
         store: false,
@@ -49,7 +50,7 @@ export default {
         reasoning: { effort: env.REASONING_EFFORT || "low" },
         text: { verbosity: "medium" },
         // Static instructions come first, so OpenAI's automatic prefix caching applies across attendees.
-        prompt_cache_key: "ai-upskill-path",
+        prompt_cache_key: `ai-upskill-path-${version}`,
       }),
     });
 

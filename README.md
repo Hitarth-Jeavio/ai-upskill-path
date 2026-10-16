@@ -89,3 +89,17 @@ For local runs, temporarily set `WORKER_URL: "http://localhost:8787"` in `site/c
   node --input-type=module -e 'import("./site/catalog.js").then(async ({CATALOG})=>{for(const c of CATALOG){const r=await fetch(c.url,{redirect:"follow"}).catch(e=>({status:e.message}));if(r.status!==200)console.log(r.status,c.id,c.url)}})'
   ```
 - **Prompt:** edit `site/prompt.js`, then redeploy **both** the site (push) and the Worker (`npx wrangler deploy`). The Worker bundles its own copy of the prompt.
+
+## Prompt versions
+
+`site/prompt.js` holds two output formats that share the same design and resource rules:
+
+| Version | Output |
+| --- | --- |
+| `v1` | Markdown prose with phase sections (the original prompt) |
+| `v2` | Tables: where you stand, skills, roadmap, and a week-by-week plan for each phase (default) |
+
+- The default is set by `PROMPT_VERSION` in `site/config.js`.
+- Adding `?v=1` or `?v=2` to the page URL overrides it for that visit, for side-by-side comparison, e.g. `https://jeaviollc.github.io/ai-upskill-path/?code=<event-code>&v=1`.
+- The page sends the version to the Worker. The Worker accepts only the versions defined in `prompt.js` and falls back to the default otherwise.
+- The copy-prompt fallback uses the same version.
