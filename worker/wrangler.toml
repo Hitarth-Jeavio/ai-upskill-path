@@ -4,7 +4,7 @@ compatibility_date = "2026-10-01"
 
 [vars]
 # Your GitHub Pages origin, without a path. Add http://localhost:8080 for local testing.
-ALLOWED_ORIGINS = "https://hitarth-jeavio.github.io,http://localhost:8080"
+ALLOWED_ORIGINS = "https://jeaviollc.github.io,http://localhost:8080"
 # The generator turns itself off after this time, so the key only works on the day.
 EXPIRES_AT = "2026-10-30T18:30:00Z"
 # gpt-6.1-sol balances quality and cost; gpt-6-astra is the top tier (~5x the price).
