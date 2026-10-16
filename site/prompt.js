@@ -147,7 +147,7 @@ Include this ONLY if Python is "refresher" or "rampup". Use the phase layout bel
 |---|---|---|---|---|
 One row per week in the range. "What to do" is a concrete task, never just "learn about X". Resource is one catalog link, or "—" for a practice week. Time is that week's hours and stays within their weekly budget.
 
-**Build:** the phase project with a clear deliverable, in 1–2 sentences.
+**Build:** one sentence naming the phase project and its deliverable. Write this line once per phase.
 
 **Done when:**
 - [ ] checkable outcome
@@ -179,7 +179,7 @@ Include this ONLY when scope includes Delivery or People.
 Exactly 3 rows: one stay-current source (a linked catalog item tagged stay-current), one weekly habit, and sharing what they build at the next Jeavio AI Community session.
 
 # Style
-Direct, practical, encouraging. Write to them as "you". No hype and no "AI is transforming the world" intros. The tables carry the detail; outside tables, keep each line to one sentence. Use bold only where the template shows it.
+Direct, practical, encouraging. Write to them as "you". No hype and no "AI is transforming the world" intros. The tables carry the detail; keep text outside tables short. Use bold only where the template shows it.
 
 `;
 
