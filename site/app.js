@@ -1,4 +1,4 @@
-import { FIELDS, EXPOSURE, SPECIALIZATIONS, STAGES, REQUIRED, normalizeProfile, computeStage, labelOf } from "./questions.js";
+import { FIELDS, EXPOSURE, SPECIALIZATIONS, RUNGS, BUILDINGS, REQUIRED, TEAM_RUNG, normalizeProfile, computeLadder, teamRungApplies, labelOf } from "./questions.js";
 import { buildFullPrompt, resolveVersion } from "./prompt.js";
 
 const WORKER_URL = (window.APP_CONFIG?.WORKER_URL || "").replace(/\/$/, "");
@@ -6,7 +6,8 @@ const WORKER_URL = (window.APP_CONFIG?.WORKER_URL || "").replace(/\/$/, "");
 const urlVersion = new URLSearchParams(location.search).get("v");
 const PROMPT_VERSION = resolveVersion(urlVersion ? `v${urlVersion.replace(/^v/i, "")}` : window.APP_CONFIG?.PROMPT_VERSION);
 const STORE_KEY = "ai-upskill-answers";
-const CODE_KEY = "ai-upskill-code";
+const PATH_KEY = "ai-upskill-path";
+const PROGRESS_KEY = "ai-upskill-progress";
 const COLORS = ["var(--orange)", "var(--teal)", "var(--green)", "var(--yellow)"];
 
 const $ = (sel) => document.querySelector(sel);
@@ -15,6 +16,8 @@ const steps = [...document.querySelectorAll(".step")];
 let current = 0;
 let reached = 0;
 let markdown = "";
+let pathId = "";
+const openPlans = new Set();
 
 function el(tag, props = {}, ...children) {
   const node = Object.assign(document.createElement(tag), props);
@@ -42,19 +45,21 @@ function renderStatic() {
   document.querySelectorAll("[data-field]").forEach((q) => {
     const key = q.dataset.field;
     const f = FIELDS[key];
-    const hint = REQUIRED.includes(key) ? null : el("span", { className: "opt", textContent: f.type === "multi" ? "pick any" : "optional" });
+    const hint = REQUIRED.includes(key) ? null : el("span", { className: "opt", textContent: f.type === "multi" ? "pick any" : "optional · click again to clear" });
     const type = f.type === "multi" ? "checkbox" : "radio";
     q.append(
       el("p", { className: "q-label" }, f.label, hint ? " " : null, hint),
       el("div", { className: "chips" }, ...f.options.map((o) => chip(key, o.value, o.label, type)))
     );
+    const note = q.querySelector(".inline-note");
+    if (note) q.append(note);
   });
 
   $("#exposure").append(
     ...EXPOSURE.map((g, gi) => {
       const title = el("p", { className: "exp-title", textContent: g.group });
       title.style.setProperty("--accent", COLORS[gi % 4]);
-      return el(
+      const group = el(
         "div",
         { className: "exp-group" },
         title,
@@ -66,12 +71,27 @@ function renderStatic() {
           )
         )
       );
+      group.dataset.rung = g.items[0].rung ?? "";
+      return group;
     })
   );
 
-  $("#meter").append(
-    ...STAGES.map((s) =>
-      el("li", {}, el("span", { className: "dot" }), el("div", {}, el("div", { className: "name", textContent: s.name }), el("div", { className: "blurb", textContent: s.blurb })))
+  // Top rung first, matching the slide.
+  $("#ladder").append(
+    ...RUNGS.filter((r) => r.level > 0).reverse().map((r) => {
+      const li = el("li", { className: "rung", title: r.blurb },
+        el("span", { className: "rung-name", textContent: r.name }),
+        el("span", { className: "rung-tag" }));
+      li.dataset.level = r.level;
+      return li;
+    })
+  );
+  $("#buildings").append(
+    el("p", { className: "branch", textContent: "Different buildings" }),
+    ...BUILDINGS.map((b) =>
+      el("div", { className: "building", title: b.blurb },
+        el("span", { className: "b-name", textContent: b.name }),
+        el("span", { className: "b-status", textContent: "Not yet" }))
     )
   );
 
@@ -110,12 +130,36 @@ function restoreForm(raw) {
   }
 }
 
-// Keeps the rail's stage meter and answer summary in sync with the form.
+// Keeps the rail's ladder, buildings and answer summary in sync with the form.
 function updateRail() {
   const { profile } = normalizeProfile(readForm());
-  const stage = computeStage(profile);
-  $("#meter").querySelectorAll("li").forEach((li, i) => {
-    li.className = i < stage.level ? "done" : i === stage.level ? "now" : "";
+  const ladder = computeLadder(profile);
+  const gaps = ladder.gaps.map((g) => g.level);
+  [...$("#ladder").children].forEach((li) => {
+    const level = Number(li.dataset.level);
+    const state = level === ladder.highest.level ? "now" : gaps.includes(level) ? "gap" : ladder.reached.includes(level) ? "reached" : "";
+    li.className = `rung ${state}`;
+    li.querySelector(".rung-tag").textContent = state === "now" ? "Here" : state === "gap" ? "Gap" : "";
+  });
+  $("#ground").classList.toggle("now", ladder.highest.level === 0);
+  // The Python question only applies when Python isn't one of their languages.
+  const pyQuestion = document.querySelector('[data-field="python"]');
+  pyQuestion.hidden = profile.languages.includes("Python");
+  if (pyQuestion.hidden) pyQuestion.querySelectorAll("input:checked").forEach((i) => (i.checked = false));
+
+  // Nudge, without blocking, when a fine-tuning goal meets a no-Python answer.
+  $("#pyNote").hidden = !(profile.goal === "models" && !["strong", "refresher", "rampup"].includes(profile.python));
+
+  // Hide rung 3 below Lead level, and clear anything ticked there.
+  const teamRung = teamRungApplies(profile);
+  [...$("#ladder").children].forEach((li) => (li.hidden = Number(li.dataset.level) === TEAM_RUNG && !teamRung));
+  const teamGroup = document.querySelector(`.exp-group[data-rung="${TEAM_RUNG}"]`);
+  teamGroup.hidden = !teamRung;
+  if (!teamRung) teamGroup.querySelectorAll("input:checked").forEach((i) => (i.checked = false));
+  [...$("#buildings").querySelectorAll(".building")].forEach((node, i) => {
+    const visited = ladder.buildings[i].visited;
+    node.classList.toggle("visited", visited);
+    node.querySelector(".b-status").textContent = visited ? "Been inside" : "Not yet";
   });
 
   const one = (k) => (profile[k] ? labelOf(k, profile[k]) : "");
@@ -203,9 +247,7 @@ function enhance(frag) {
       const item = el("section", { className: "tl-item" }, node, body);
       item.style.setProperty("--bar", color);
       out.append(item);
-      const link = el("a", { href: `#sec-${n}`, textContent: node.textContent.replace(/\s*\(Weeks?[^)]*\)/i, "") });
-      link.style.setProperty("--bar", color);
-      toc.push(link);
+      toc.push(node);
       continue;
     }
     (body || out).append(node);
@@ -219,7 +261,63 @@ function enhance(frag) {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
   });
-  $("#toc").replaceChildren(...toc);
+
+  // Pin "Start this week" first so the next step is the first thing they see.
+  const items = [...out.querySelectorAll(".tl-item")];
+  const start = items.find((i) => /^Start this week/i.test(i.querySelector("h2").textContent));
+  if (start && items[0] !== start) items[0].before(start);
+
+  for (const item of out.querySelectorAll(".tl-item")) {
+    const title = item.querySelector("h2").textContent;
+    // Task rows and "Done when" items become checkboxes that remember progress.
+    item.querySelectorAll("table").forEach((t) => {
+      const cols = [...t.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+      if (!cols.includes("Week") || !cols.includes("What to do")) return;
+      // Show depth as a tag under the topic, saving a column.
+      const heads = [...t.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+      const di = heads.indexOf("Depth"), ti = heads.indexOf("Topic");
+      if (di >= 0 && ti >= 0) {
+        t.querySelectorAll("tr").forEach((tr) => {
+          const cells = tr.children;
+          if (tr.parentElement.tagName === "TBODY") cells[ti].append(el("span", { className: "depth-tag", textContent: cells[di].textContent.trim() }));
+          cells[di].remove();
+        });
+      }
+      t.querySelector("thead tr").prepend(el("th", { textContent: "Done" }));
+      t.querySelectorAll("thead th").forEach((th) => th.classList.add(`col-${th.textContent.trim().toLowerCase().replace(/[^a-z]+/g, "-")}`));
+      t.querySelectorAll("tbody tr").forEach((tr) => {
+        const box = el("input", { type: "checkbox", className: "task-box" });
+        box.dataset.key = `${title}|${tr.textContent.replace(/\s+/g, " ").trim()}`;
+        box.setAttribute("aria-label", "Mark task done");
+        tr.prepend(el("td", { className: "done-cell" }, box));
+      });
+    });
+    item.querySelectorAll('li > input[type="checkbox"]').forEach((box) => {
+      box.disabled = false;
+      box.dataset.key = `${title}|${box.parentElement.textContent.replace(/\s+/g, " ").trim()}`;
+    });
+    // Phases show goal, build and outcomes; the weekly rows collapse.
+    if (!/^(Phase|Python ramp-up|Specialization track)/i.test(title)) continue;
+    const body = item.querySelector(".tl-body");
+    const table = body.querySelector(".table-scroll");
+    if (!table) continue;
+    const rows = [...table.querySelectorAll("tbody tr")];
+    const hours = rows.reduce((sum, r) => sum + (parseFloat(r.lastElementChild?.textContent) || 0), 0);
+    const extra = [...body.querySelectorAll("p")].find((p) => /^Additional sources/i.test(p.textContent.trim()));
+    const plan = el("details", { className: "plan" },
+      el("summary", { textContent: `Weekly plan · ${rows.length} task${rows.length === 1 ? "" : "s"}${hours ? ` · ${hours} hrs` : ""}` }));
+    plan.dataset.key = title;
+    plan.open = openPlans.has(title);
+    table.before(plan);
+    plan.append(table);
+    if (extra) plan.append(extra);
+  }
+
+  $("#toc").replaceChildren(...[...out.querySelectorAll(".tl-item h2")].map((h) => {
+    const link = el("a", { href: `#${h.id}`, textContent: h.textContent.replace(/\s*\(Weeks?[^)]*\)/i, "") });
+    link.style.setProperty("--bar", h.closest(".tl-item").style.getPropertyValue("--bar"));
+    return link;
+  }));
   return out;
 }
 
@@ -234,6 +332,7 @@ function render() {
       FORBID_TAGS: ["img", "style", "form", "iframe"],
     });
     $("#output").replaceChildren(enhance(frag));
+    applyProgress();
   });
 }
 
@@ -267,8 +366,34 @@ function handleEvent(data) {
   }
 }
 
+function savedProgress() {
+  const p = store.get(PROGRESS_KEY);
+  return p && p.id === pathId ? p.done : {};
+}
+
+function applyProgress() {
+  const done = savedProgress();
+  const boxes = [...$("#output").querySelectorAll("input[data-key]")];
+  boxes.forEach((b) => (b.checked = !!done[b.dataset.key]));
+  const n = boxes.filter((b) => b.checked).length;
+  $("#progressTrack").hidden = !boxes.length;
+  $("#ptFill").style.width = boxes.length ? `${(100 * n) / boxes.length}%` : "0";
+  $("#ptText").textContent = `${n} of ${boxes.length} done`;
+}
+
+function refreshSavedBanner() {
+  const saved = store.get(PATH_KEY);
+  $("#savedBanner").hidden = !saved?.markdown;
+  if (saved?.markdown) {
+    const day = new Date(saved.at).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+    $("#savedText").textContent = `You have a saved learning path from ${day}.`;
+  }
+}
+
 async function generate(profile) {
   markdown = "";
+  pathId = String(Date.now());
+  openPlans.clear();
   $("#output").replaceChildren();
   $("#toc").replaceChildren();
   $("#actions").hidden = true;
@@ -279,7 +404,7 @@ async function generate(profile) {
     const res = await fetch(`${WORKER_URL}/generate`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ profile, eventCode: $("#eventCode").value, promptVersion: PROMPT_VERSION }),
+      body: JSON.stringify({ profile, promptVersion: PROMPT_VERSION }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -305,6 +430,7 @@ async function generate(profile) {
     setStatus(note || "");
     $("#actions").hidden = false;
     showFallback(profile);
+    store.set(PATH_KEY, { id: pathId, markdown, title: $("#resultTitle").textContent, at: Date.now() });
   } catch (e) {
     setStatus(e.message, true);
     if (markdown) $("#actions").hidden = false;
@@ -325,25 +451,85 @@ async function copyText(text, okMsg) {
 function init() {
   renderStatic();
 
-  const urlCode = new URLSearchParams(location.search).get("code");
-  if (urlCode) store.set(CODE_KEY, urlCode);
-  const code = urlCode || store.get(CODE_KEY);
-  if (code) $("#eventCode").value = code;
-  $("#codeWrap").hidden = !WORKER_URL || !!code;
   if (!WORKER_URL) $("#copyPromptBtn").className = "btn btn-primary";
 
   restoreForm(store.get(STORE_KEY));
   updateRail();
   goTo(0);
+  refreshSavedBanner();
+
+  $("#openSavedBtn").addEventListener("click", () => {
+    const saved = store.get(PATH_KEY);
+    if (!saved) return;
+    pathId = saved.id;
+    markdown = saved.markdown;
+    openPlans.clear();
+    $("#wizard").hidden = true;
+    $("#result").hidden = false;
+    $("#resultTitle").textContent = saved.title;
+    $("#actions").hidden = false;
+    $("#fallback").hidden = true;
+    setStatus("");
+    render();
+    window.scrollTo({ top: 0 });
+  });
+  $("#output").addEventListener("change", (e) => {
+    const key = e.target.dataset?.key;
+    if (!key || !pathId) return;
+    const done = { ...savedProgress() };
+    if (e.target.checked) done[key] = true;
+    else delete done[key];
+    store.set(PROGRESS_KEY, { id: pathId, done });
+    applyProgress();
+  });
+  // "toggle" doesn't bubble, so listen in the capture phase to remember open plans.
+  $("#output").addEventListener("toggle", (e) => {
+    if (!e.target.classList?.contains("plan")) return;
+    if (e.target.open) openPlans.add(e.target.dataset.key);
+    else openPlans.delete(e.target.dataset.key);
+  }, true);
+  // Print the full plan, not just the collapsed summaries.
+  window.addEventListener("beforeprint", () => document.querySelectorAll("details.plan").forEach((d) => { d.dataset.wasOpen = d.open; d.open = true; }));
+  window.addEventListener("afterprint", () => document.querySelectorAll("details.plan").forEach((d) => (d.open = d.dataset.wasOpen === "true")));
 
   form.addEventListener("change", (e) => {
     if (e.target.name === "role") renderSpecs(e.target.value, readForm().specializations);
+    // Pre-select the leadership role for EM and above; undo it only if we set it and they move away from EM.
+    if (e.target.name === "experience") {
+      const lead = form.querySelector('input[name="role"][value="lead"]');
+      if (e.target.value === "em" && !lead.checked && !form.dataset.roleChosen) {
+        lead.checked = true;
+        lead.dataset.auto = "1";
+        renderSpecs("lead", readForm().specializations);
+        lead.closest(".q")?.classList.remove("invalid");
+      } else if (e.target.value !== "em" && lead.checked && lead.dataset.auto) {
+        lead.checked = false;
+        renderSpecs(null);
+      }
+    }
+    if (e.target.name === "role") {
+      form.dataset.roleChosen = "1";
+      delete form.querySelector('input[name="role"][value="lead"]').dataset.auto;
+    }
     e.target.closest(".q")?.classList.remove("invalid");
     if (!document.querySelector(".q.invalid")) $("#formError").textContent = "";
     store.set(STORE_KEY, readForm());
     updateRail();
   });
   form.addEventListener("input", () => store.set(STORE_KEY, readForm()));
+  // Optional single-choice answers can be cleared by clicking the chosen chip again.
+  const lastPick = {};
+  form.addEventListener("pointerdown", (e) => {
+    const input = e.target.closest(".chip")?.querySelector('input[type="radio"]');
+    if (input && !REQUIRED.includes(input.name)) lastPick[input.name] = input.checked ? input.value : null;
+  });
+  form.addEventListener("click", (e) => {
+    const input = e.target.closest('input[type="radio"]');
+    if (!input || REQUIRED.includes(input.name) || lastPick[input.name] !== input.value) return;
+    input.checked = false;
+    lastPick[input.name] = null;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
   // Enter in a text field shouldn't skip ahead or submit early.
   form.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && e.target.tagName === "INPUT") e.preventDefault();
@@ -373,6 +559,7 @@ function init() {
   $("#editBtn").addEventListener("click", () => {
     $("#result").hidden = true;
     $("#wizard").hidden = false;
+    refreshSavedBanner();
     goTo(steps.length - 1);
   });
   $("#copyBtn").addEventListener("click", () => copyText(markdown, "Path copied as Markdown."));

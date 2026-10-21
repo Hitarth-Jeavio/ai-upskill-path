@@ -1,6 +1,6 @@
 # AI Upskill Path · Jeavio AI Community
 
-A single-page app for the "How to upskill yourself in AI" session. Attendees answer about 12 quick questions. The page works out their current AI stage on the spot, and then a GPT model writes a personalised learning path that builds on what they already know.
+A single-page app for the "How to upskill yourself in AI" session. Attendees answer about 12 quick questions. The page places them on the session's AI ladder (rungs 1–5, plus the separate model buildings) on the spot, and then a GPT model writes a personalised learning path that builds on what they already know.
 
 ```
 GitHub Pages (static site/)  ──POST /generate──▶  Cloudflare Worker  ──▶  OpenAI Responses API (gpt-6.1-sol)
@@ -10,16 +10,17 @@ GitHub Pages (static site/)  ──POST /generate──▶  Cloudflare Worker  �
 
 - **No key in the browser.** GitHub Pages is static, so a small Worker holds the API key.
 - **Turns itself off.** The Worker stops answering after `EXPIRES_AT`, so "our key, for the day only" is enforced.
-- **No hallucinated links.** The model may only cite URLs from `site/catalog.js`. That's 105 curated resources, all checked to resolve.
+- **No hallucinated links.** The model may only cite URLs from `site/catalog.js`. That's 247 curated resources (including 36 videos), all checked to resolve, with SDK links for every language the form offers.
 - **Always has a fallback.** "Copy prompt for my own AI" gives attendees the exact same prompt to paste into ChatGPT, Claude or Gemini. It works without the Worker, and after the event.
-- **Nothing stored.** Answers stay in the attendee's browser (localStorage) and go to OpenAI with `store: false`.
+- **Nothing stored on a server.** Answers, the last generated path and its progress stay in the attendee's browser (localStorage). Requests go to OpenAI with `store: false`.
+- **Built to come back to.** The path opens with "Start this week", each phase's weekly plan is collapsible, tasks and "Done when" items can be ticked off with a progress bar, and a returning attendee gets an "Open it" link to their saved path.
 
 ## Repo layout
 
 | Path | What it is |
 | --- | --- |
 | `site/index.html`, `styles.css`, `app.js` | The page, in Jeavio's design language |
-| `site/questions.js` | Question set, stage ladder, input validation (shared with the Worker) |
+| `site/questions.js` | Question set, AI ladder and buildings, input validation (shared with the Worker) |
 | `site/prompt.js` | System prompt and user prompt builder (shared with the Worker) |
 | `site/catalog.js` | Curated resources. The only links the model may use |
 | `site/config.js` | `WORKER_URL`. Leave it empty for copy-prompt-only mode |
@@ -35,7 +36,6 @@ cd worker
 npm install
 npx wrangler login
 npx wrangler secret put OPENAI_API_KEY      # paste the key
-npx wrangler secret put EVENT_CODE          # optional, e.g. AICOMM; shown on the slide or baked into the QR link
 ```
 
 In `worker/wrangler.toml`:
@@ -64,8 +64,8 @@ npx wrangler deploy        # prints https://ai-upskill-path.<subdomain>.workers.
 
 ## 3. Event-day runbook
 
-- Share `https://<org>.github.io/ai-upskill-path/?code=AICOMM` as a QR code. The `?code=` pre-fills the event code, so attendees never type it.
-- In the OpenAI dashboard, set a hard budget on the project.
+- Share `https://<org>.github.io/ai-upskill-path/` as a QR code.
+- In the OpenAI dashboard, set a hard budget on the project. There's no event code, so anyone with the link can generate a path until `EXPIRES_AT`; the budget is the backstop.
 - Watch live logs with `cd worker && npx wrangler tail`.
 - After the session, the Worker returns "closed" once `EXPIRES_AT` passes, and the page points people to the copy-prompt fallback. To shut it down early, run `npx wrangler secret delete OPENAI_API_KEY`.
 
@@ -77,14 +77,14 @@ npx wrangler deploy        # prints https://ai-upskill-path.<subdomain>.workers.
 cd worker && cp .dev.vars.example .dev.vars   # add your key
 npx wrangler dev                               # http://localhost:8787
 # in another terminal
-cd site && python3 -m http.server 8080         # http://localhost:8080/?code=AICOMM
+cd site && python3 -m http.server 8080         # http://localhost:8080/
 ```
 For local runs, temporarily set `WORKER_URL: "http://localhost:8787"` in `site/config.js`.
 
 ## Changing content
 
 - **Questions or specializations:** edit `site/questions.js`. The form renders from it, and the Worker validates against it.
-- **Resources:** add entries to `site/catalog.js`, then check the links:
+- **Resources:** add entries to `site/catalog.js`. Set `kind` to `learn` (a video, course, article or book with a finite length) or `reference` (docs, repos, tools), and `duration` to the length the source itself states, or leave it empty. The model uses these to size each task's hours. Then check the links:
   ```bash
   node --input-type=module -e 'import("./site/catalog.js").then(async ({CATALOG})=>{for(const c of CATALOG){const r=await fetch(c.url,{redirect:"follow"}).catch(e=>({status:e.message}));if(r.status!==200)console.log(r.status,c.id,c.url)}})'
   ```
@@ -100,6 +100,6 @@ For local runs, temporarily set `WORKER_URL: "http://localhost:8787"` in `site/c
 | `v2` | Tables: where you stand, skills, roadmap, and a week-by-week plan for each phase (default) |
 
 - The default is set by `PROMPT_VERSION` in `site/config.js`.
-- Adding `?v=1` or `?v=2` to the page URL overrides it for that visit, for side-by-side comparison, e.g. `https://jeaviollc.github.io/ai-upskill-path/?code=<event-code>&v=1`.
+- Adding `?v=1` or `?v=2` to the page URL overrides it for that visit, for side-by-side comparison, e.g. `https://jeaviollc.github.io/ai-upskill-path/?v=1`.
 - The page sends the version to the Worker. The Worker accepts only the versions defined in `prompt.js` and falls back to the default otherwise.
 - The copy-prompt fallback uses the same version.

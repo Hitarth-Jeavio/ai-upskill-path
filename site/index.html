@@ -24,9 +24,16 @@
         <p>Tell us what you already do. We'll show where you stand and map a path for your role, your stack and your time.</p>
       </div>
 
-      <div class="meter-wrap">
+      <div class="stand">
         <p class="label">Where you stand</p>
-        <ol class="meter" id="meter"></ol>
+        <div class="map">
+          <div class="ladder-col">
+            <ol class="ladder" id="ladder" aria-label="AI ladder"></ol>
+            <p class="ground" id="ground">Not started</p>
+          </div>
+          <div class="buildings" id="buildings" aria-label="Separate buildings"></div>
+        </div>
+        <p class="map-key"><span class="k-reached">Reached</span><span class="k-gap">Gap</span><span class="k-now">You're here</span></p>
       </div>
 
       <dl class="summary" id="summary"></dl>
@@ -36,6 +43,10 @@
 
     <main class="work">
       <div id="wizard">
+        <div class="saved" id="savedBanner" hidden>
+          <span id="savedText"></span>
+          <button class="btn btn-link" type="button" id="openSavedBtn">Open it →</button>
+        </div>
         <nav class="progress" id="progress" aria-label="Steps"></nav>
 
         <form id="form" novalidate>
@@ -67,7 +78,7 @@
             <header class="step-head">
               <p class="label c-green">Step 3 of 4</p>
               <h2>What have you already done with AI?</h2>
-              <p class="muted">Tick everything that's true today. Watch the meter on the left move.</p>
+              <p class="muted">Tick everything that's true today. Watch the ladder on the left move.</p>
             </header>
             <div class="q" id="exposure"></div>
           </section>
@@ -77,7 +88,9 @@
               <p class="label c-yellow">Step 4 of 4</p>
               <h2>Where do you want to go?</h2>
             </header>
-            <div class="q" data-field="goal"></div>
+            <div class="q" data-field="goal">
+              <p class="inline-note" id="pyNote" hidden>Most model-tuning tools are Python-based. Your path can stay in your own languages, but to go deeper, consider "New to it, include a Python track" in step 2.</p>
+            </div>
             <div class="q">
               <p class="q-label">Specializations that interest you <span class="opt">optional</span></p>
               <div class="chips" id="specs"></div>
@@ -88,10 +101,6 @@
             <div class="q">
               <label class="q-label" for="notes">Anything else we should know? <span class="opt">optional</span></label>
               <textarea class="text" id="notes" name="notes" rows="3" maxlength="500" placeholder="e.g. my client forbids public LLMs; I want to move into an AI team; I'm preparing for a GenAI project next month"></textarea>
-            </div>
-            <div class="q" id="codeWrap" hidden>
-              <label class="q-label" for="eventCode">Event code</label>
-              <input class="text code" id="eventCode" name="eventCode" maxlength="20" autocomplete="off" placeholder="From the slide" />
             </div>
           </section>
 
@@ -123,6 +132,10 @@
           </div>
         </header>
         <p class="status" id="status"></p>
+        <div class="progress-track" id="progressTrack" hidden>
+          <div class="pt-bar" aria-hidden="true"><span id="ptFill"></span></div>
+          <span id="ptText"></span>
+        </div>
 
         <div class="result-body">
           <nav class="toc" id="toc" aria-label="Path sections"></nav>

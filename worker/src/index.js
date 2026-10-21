@@ -28,9 +28,6 @@ export default {
     } catch {
       return json({ error: "Invalid JSON" }, 400, cors);
     }
-    if (env.EVENT_CODE && (body.eventCode || "").trim().toUpperCase() !== env.EVENT_CODE.toUpperCase()) {
-      return json({ error: "Wrong event code. Check the code on the session slide." }, 401, cors);
-    }
 
     const { profile, missing } = normalizeProfile(body.profile);
     if (missing.length) return json({ error: `Missing: ${missing.join(", ")}` }, 400, cors);

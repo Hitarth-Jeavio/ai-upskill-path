@@ -14,4 +14,3 @@ MAX_OUTPUT_TOKENS = "16000"
 
 # Secrets: set these with `npx wrangler secret put <NAME>`, never in this file.
 #   OPENAI_API_KEY
-#   EVENT_CODE   (optional; shown on the session slide or baked into the QR link)

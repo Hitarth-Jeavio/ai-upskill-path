@@ -7,6 +7,7 @@ export const ROLES = [
   { value: "ops", label: "Ops (DevOps / SRE / Platform)" },
   { value: "data", label: "Data (Engineering / Science)" },
   { value: "design", label: "Design (UX / UI)" },
+  { value: "lead", label: "Engineering leadership (EM, Delivery, Director)" },
 ];
 
 export const SPECIALIZATIONS = {
@@ -53,43 +54,84 @@ export const SPECIALIZATIONS = {
     "Designing AI-native UX",
     "Prototyping with AI tools",
   ],
+  lead: [
+    "AI adoption & enablement for my team",
+    "AI-native team roles & workflows",
+    "Scoping, estimating & pricing Gen AI projects",
+    "Gen AI solutioning & pre-sales for clients",
+    "AI governance, security & client data",
+    "Measuring AI productivity & ROI",
+  ],
 };
 
-export const STAGES = [
-  { level: 0, name: "AI Curious", blurb: "You know AI matters but haven't made it part of your work yet." },
-  { level: 1, name: "AI User", blurb: "You use chat assistants for everyday tasks." },
-  { level: 2, name: "AI-Augmented", blurb: "AI tools are part of how you work every day." },
-  { level: 3, name: "GenAI Builder", blurb: "You build features on top of LLM APIs." },
-  { level: 4, name: "AI Systems Builder", blurb: "You ship agents and production GenAI with evals and monitoring." },
-  { level: 5, name: "Model Builder", blurb: "You fine-tune or train models." },
+// The AI ladder from the session deck. Rung 0 means not started yet.
+export const RUNGS = [
+  { level: 0, name: "Not started", blurb: "AI isn't part of your work yet." },
+  { level: 1, name: "Use AI", blurb: "Chat tools and prompting for everyday work." },
+  { level: 2, name: "Build with Gen AI", blurb: "Agentic coding tools, rules, skills, hooks and specs." },
+  { level: 3, name: "Enable your team", blurb: "Shared skills, agents and a harness that make a team AI-native." },
+  { level: 4, name: "Build Gen AI apps", blurb: "LLM APIs, a simple RAG, chatbot or agent." },
+  { level: 5, name: "Architect Gen AI apps", blurb: "Agentic and multi-agent design, evals, RAG vs NL2SQL vs fine-tuning." },
 ];
 
-// "level" feeds the starting stage; 0 means it's context only and doesn't move the stage.
+// Separate from the ladder, not rungs above it.
+export const BUILDINGS = [
+  { key: "tuning", name: "Model tuning / ML", blurb: "Fine-tune with LoRA, run small models on company data, serve them." },
+  { key: "models", name: "Models", blurb: "Pretrain and post-train, as frontier and sovereign labs do." },
+];
+
+// Each item marks either a rung or a building as reached.
 export const EXPOSURE = [
   {
-    group: "Building with AI — AI as your tool",
+    group: "Use AI",
     items: [
-      { value: "chat", level: 1, label: "Use ChatGPT / Claude / Gemini for work tasks" },
-      { value: "assistant", level: 2, label: "Use an AI coding or work assistant daily (Copilot, Cursor, Claude Code)" },
-      { value: "agentic", level: 2, label: "Hand off multi-step tasks to agentic tools, with custom rules / MCP servers" },
+      { value: "chat", rung: 1, label: "Use ChatGPT / Claude / Gemini for work tasks" },
+      { value: "prompting", rung: 1, label: "Write structured prompts (examples, steps, roles) to get reliable answers" },
     ],
   },
   {
-    group: "Building GenAI applications",
+    group: "Build with Gen AI",
     items: [
-      { value: "api", level: 3, label: "Called an LLM API from code (OpenAI, Anthropic, Bedrock, Azure OpenAI)" },
-      { value: "rag", level: 3, label: "Built RAG: embeddings, chunking, vector search" },
-      { value: "agents", level: 4, label: "Built tool-calling agents or MCP servers" },
-      { value: "prod", level: 4, label: "Shipped a GenAI feature to production with evals & monitoring" },
+      { value: "assistant", rung: 2, label: "Use an agentic coding tool daily (Claude Code, Cursor, Codex, Copilot agent)" },
+      { value: "rules", rung: 2, label: "Set up rules, skills or custom commands (CLAUDE.md, AGENTS.md, Cursor rules)" },
+      { value: "agentic", rung: 2, label: "Connect MCP servers, hooks or subagents to your coding tool" },
+      { value: "spec", rung: 2, label: "Work spec-first: write the spec, let the agent build, review the result" },
     ],
   },
   {
-    group: "Building AI — models",
+    group: "Enable your team",
     items: [
-      { value: "classicml", level: 0, label: "Trained classical ML models (scikit-learn, XGBoost)" },
-      { value: "finetune", level: 5, label: "Fine-tuned a model (LoRA, SFT)" },
-      { value: "dl", level: 5, label: "Trained deep learning models (PyTorch / TensorFlow)" },
+      { value: "shared", rung: 3, label: "Built shared skills, rules or agents that your team uses" },
+      { value: "harness", rung: 3, label: "Set up a team harness: AI checks in CI, review guardrails, sandboxes" },
     ],
+  },
+  {
+    group: "Build Gen AI apps",
+    items: [
+      { value: "api", rung: 4, label: "Called an LLM API from code (OpenAI, Anthropic, Bedrock, Azure OpenAI)" },
+      { value: "rag", rung: 4, label: "Built a simple RAG or chatbot (embeddings, chunking, vector search)" },
+      { value: "agents", rung: 4, label: "Built a tool-calling agent or an MCP server" },
+    ],
+  },
+  {
+    group: "Architect Gen AI apps",
+    items: [
+      { value: "multiagent", rung: 5, label: "Designed an agentic or multi-agent system" },
+      { value: "prod", rung: 5, label: "Run evals and observability on a production Gen AI feature" },
+      { value: "choose", rung: 5, label: "Chose between prompting, RAG, NL2SQL and fine-tuning for a real problem" },
+    ],
+  },
+  {
+    group: "Model tuning / ML (separate building)",
+    items: [
+      { value: "classicml", building: "tuning", label: "Trained classical ML models (scikit-learn, XGBoost)" },
+      { value: "finetune", building: "tuning", label: "Fine-tuned a model (LoRA, SFT)" },
+      { value: "serve", building: "tuning", label: "Served your own model (vLLM, Ollama, SageMaker)" },
+    ],
+  },
+  {
+    group: "Models (separate building)",
+    items: [{ value: "pretrain", building: "models", label: "Pretrained or post-trained a model, research-grade" }],
   },
 ];
 
@@ -118,16 +160,16 @@ export const FIELDS = {
   languages: {
     label: "Language ecosystems you work in",
     type: "multi",
-    options: ["Python", "JavaScript / TypeScript", "Java", ".NET / C#", "Go", "Rust", "PHP", "Mobile (Kotlin / Swift / Flutter)", "None / not applicable"].map((v) => ({ value: v, label: v })),
+    options: ["Python", "JavaScript / TypeScript", "Java", ".NET / C#", "Go", "Rust", "PHP", "Android (Kotlin)", "iOS (Swift)", "Flutter", "None / not applicable"].map((v) => ({ value: v, label: v })),
   },
   python: {
     label: "Python",
     type: "single",
     options: [
+      { value: "skip", label: "No Python, keep my path in my own languages" },
       { value: "strong", label: "I'm comfortable in Python" },
       { value: "refresher", label: "Basic, I'd like a refresher" },
       { value: "rampup", label: "New to it, include a Python track" },
-      { value: "skip", label: "New to it, keep me in my own ecosystem" },
     ],
   },
   exposure: { label: "What have you already done?", type: "multi", options: EXPOSURE.flatMap((g) => g.items) },
@@ -164,7 +206,7 @@ export const FIELDS = {
   style: {
     label: "How do you learn best?",
     type: "multi",
-    options: ["Hands-on projects", "Video courses", "Docs & articles", "Books"].map((v) => ({ value: v, label: v })),
+    options: ["Reading (docs, articles, books)", "Video courses", "Hands-on building", "Learning with people (meetups, pairing)"].map((v) => ({ value: v, label: v })),
   },
 };
 
@@ -177,6 +219,11 @@ const pickMany = (field, arr) =>
 const clip = (s, n = MAX_TEXT) => (typeof s === "string" ? s.trim().slice(0, n) : "");
 
 // Drops unknown fields and values, so arbitrary input never reaches the prompt.
+// Rung 3 (Enable your team) only applies to leads and above.
+export const TEAM_RUNG = 3;
+export const teamRungApplies = (profile) => ["lead", "em"].includes(profile.experience);
+const TEAM_RUNG_ITEMS = EXPOSURE.flatMap((g) => g.items).filter((i) => i.rung === TEAM_RUNG).map((i) => i.value);
+
 export function normalizeProfile(raw = {}) {
   const p = {
     name: clip(raw.name, 60),
@@ -194,15 +241,29 @@ export function normalizeProfile(raw = {}) {
     style: pickMany("style", raw.style),
     notes: clip(raw.notes),
   };
+  if (!teamRungApplies(p)) p.exposure = p.exposure.filter((v) => !TEAM_RUNG_ITEMS.includes(v));
+  // Working in Python means they know it; the Python question doesn't apply.
+  if (p.languages.includes("Python")) p.python = "strong";
   const missing = REQUIRED.filter((k) => !p[k]);
   return { profile: p, missing };
 }
 
-export function computeStage(profile) {
-  const levels = EXPOSURE.flatMap((g) => g.items)
-    .filter((i) => profile.exposure.includes(i.value))
-    .map((i) => i.level);
-  return STAGES[Math.max(0, ...levels)];
+// Highest rung reached, rungs skipped below it, and which buildings they've been in.
+export function computeLadder(profile) {
+  const done = EXPOSURE.flatMap((g) => g.items).filter((i) => profile.exposure.includes(i.value));
+  const ticked = new Set(done.filter((i) => i.rung).map((i) => i.rung));
+  // Any rung implies using AI; enabling a team implies rung 2; architecting implies building.
+  if (ticked.size) ticked.add(1);
+  if (ticked.has(3)) ticked.add(2);
+  if (ticked.has(5)) ticked.add(4);
+  const reached = [...ticked].sort((a, b) => a - b);
+  const top = Math.max(0, ...reached);
+  return {
+    highest: RUNGS[top],
+    reached,
+    gaps: RUNGS.filter((r) => r.level > 0 && r.level < top && !reached.includes(r.level) && (r.level !== TEAM_RUNG || teamRungApplies(profile))),
+    buildings: BUILDINGS.map((b) => ({ ...b, visited: done.some((i) => i.building === b.key) })),
+  };
 }
 
 export const labelOf = (field, value) => FIELDS[field].options.find((o) => o.value === value)?.label ?? value;
