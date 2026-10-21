@@ -1,6 +1,6 @@
-# AI Upskill Path · Jeavio AI Community
+# AI Upskill Path · Jeavio AI Meetup
 
-A single-page app for the "How to upskill yourself in AI" session. Attendees answer about 12 quick questions. The page places them on the session's AI ladder (rungs 1–5, plus the separate model buildings) on the spot, and then a GPT model writes a personalised learning path that builds on what they already know.
+A single-page app for the "How to upskill yourself in AI" session. Attendees answer about 12 quick questions. The page places them on the session's AI ladder (rungs 1–5, plus the separate model buildings) on the spot, and then a GPT model writes a personalized learning path that builds on what they already know.
 
 ```
 GitHub Pages (static site/)  ──POST /generate──▶  Cloudflare Worker  ──▶  OpenAI Responses API (gpt-6.1-sol)

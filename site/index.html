@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Upskill Path · Jeavio AI Community</title>
-  <meta name="description" content="Find where you stand with AI and get a personalised learning path that builds on what you already know." />
+  <title>AI Upskill Path · Jeavio AI Meetup</title>
+  <meta name="description" content="Find where you stand with AI and get a personalized learning path that builds on what you already know." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23070810'/><circle cx='16' cy='16' r='6' fill='%23FA2D00'/></svg>" />
 </head>
@@ -15,8 +15,8 @@
   <div class="app">
     <aside class="rail">
       <div class="brand">
-        <span class="wordmark">Jeavio</span>
-        <span class="brand-tag">AI Community</span>
+        <img class="logo" src="assets/jeavio-logo.svg" alt="Jeavio" width="96" height="36" />
+        <span class="brand-tag">AI Meetup</span>
       </div>
 
       <div class="rail-intro">
@@ -78,7 +78,7 @@
             <header class="step-head">
               <p class="label c-green">Step 3 of 4</p>
               <h2>What have you already done with AI?</h2>
-              <p class="muted">Tick everything that's true today. Watch the ladder on the left move.</p>
+              <p class="muted">Tick everything that's true today. Watch the ladder move.</p>
             </header>
             <div class="q" id="exposure"></div>
           </section>
@@ -142,9 +142,21 @@
           <article class="timeline" id="output" aria-live="polite"></article>
         </div>
 
+        <section class="connect" aria-labelledby="connectTitle">
+          <div>
+            <p class="label c-orange">Stay connected</p>
+            <h3 id="connectTitle">Keep learning with the Jeavio AI Meetup</h3>
+          </div>
+          <div class="connect-links">
+            <a class="btn btn-ghost" href="https://www.linkedin.com/showcase/jeavio-ai-meetup/posts/" target="_blank" rel="noopener noreferrer">AI Meetup on LinkedIn ↗</a>
+            <a class="btn btn-ghost" href="https://www.youtube.com/channel/UCm4uVHdUai1SUwFLpRLQ1Hw" target="_blank" rel="noopener noreferrer">Jeavio on YouTube ↗</a>
+            <a class="btn btn-ghost" href="https://jeavio.com/" target="_blank" rel="noopener noreferrer">jeavio.com ↗</a>
+          </div>
+        </section>
+
         <details class="fallback" id="fallback" hidden>
           <summary>Run it in your own AI assistant</summary>
-          <p class="muted">Paste this prompt into ChatGPT, Claude or Gemini. You'll get the same path.</p>
+          <p class="muted">Paste this prompt into ChatGPT, Claude or Gemini to get a similar path.</p>
           <textarea class="text" id="fallbackText" rows="8" readonly></textarea>
         </details>
       </div>

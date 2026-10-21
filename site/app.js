@@ -17,6 +17,7 @@ let current = 0;
 let reached = 0;
 let markdown = "";
 let pathId = "";
+let generating = false;
 const openPlans = new Set();
 
 function el(tag, props = {}, ...children) {
@@ -376,9 +377,10 @@ function applyProgress() {
   const boxes = [...$("#output").querySelectorAll("input[data-key]")];
   boxes.forEach((b) => (b.checked = !!done[b.dataset.key]));
   const n = boxes.filter((b) => b.checked).length;
-  $("#progressTrack").hidden = !boxes.length;
+  // It tracks the attendee's own ticks, so it only appears once the path is complete.
+  $("#progressTrack").hidden = generating || !boxes.length;
   $("#ptFill").style.width = boxes.length ? `${(100 * n) / boxes.length}%` : "0";
-  $("#ptText").textContent = `${n} of ${boxes.length} done`;
+  $("#ptText").textContent = `Your progress: ${n} of ${boxes.length} done${n ? "" : " · tick tasks as you finish them"}`;
 }
 
 function refreshSavedBanner() {
@@ -394,11 +396,12 @@ async function generate(profile) {
   markdown = "";
   pathId = String(Date.now());
   openPlans.clear();
+  generating = true;
   $("#output").replaceChildren();
   $("#toc").replaceChildren();
   $("#actions").hidden = true;
   $("#fallback").hidden = true;
-  setStatus("Analysing your answers and writing your path. This takes about a minute…");
+  setStatus("Analyzing your answers and writing your path. This takes about a minute…");
 
   try {
     const res = await fetch(`${WORKER_URL}/generate`, {
@@ -435,6 +438,9 @@ async function generate(profile) {
     setStatus(e.message, true);
     if (markdown) $("#actions").hidden = false;
     showFallback(profile, true);
+  } finally {
+    generating = false;
+    applyProgress();
   }
 }
 
