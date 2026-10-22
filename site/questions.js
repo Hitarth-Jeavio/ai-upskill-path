@@ -57,8 +57,8 @@ export const SPECIALIZATIONS = {
   lead: [
     "AI adoption & enablement for my team",
     "AI-native team roles & workflows",
-    "Scoping, estimating & pricing Gen AI projects",
-    "Gen AI solutioning & pre-sales for clients",
+    "Scoping, estimating & pricing GenAI projects",
+    "GenAI solutioning & pre-sales for clients",
     "AI governance, security & client data",
     "Measuring AI productivity & ROI",
   ],
@@ -68,10 +68,10 @@ export const SPECIALIZATIONS = {
 export const RUNGS = [
   { level: 0, name: "Not started", blurb: "AI isn't part of your work yet." },
   { level: 1, name: "Use AI", blurb: "Chat tools and prompting for everyday work." },
-  { level: 2, name: "Build with Gen AI", blurb: "Agentic coding tools, rules, skills, hooks and specs." },
+  { level: 2, name: "Build with GenAI", blurb: "Agentic coding tools, rules, skills, hooks and specs." },
   { level: 3, name: "Enable your team", blurb: "Shared skills, agents and a harness that make a team AI-native." },
-  { level: 4, name: "Build Gen AI apps", blurb: "LLM APIs, a simple RAG, chatbot or agent." },
-  { level: 5, name: "Architect Gen AI apps", blurb: "Agentic and multi-agent design, evals, RAG vs NL2SQL vs fine-tuning." },
+  { level: 4, name: "Build GenAI apps", blurb: "LLM APIs, a simple RAG, chatbot or agent." },
+  { level: 5, name: "Architect GenAI apps", blurb: "Agentic and multi-agent design, evals, RAG vs NL2SQL vs fine-tuning." },
 ];
 
 // Separate from the ladder, not rungs above it.
@@ -90,7 +90,7 @@ export const EXPOSURE = [
     ],
   },
   {
-    group: "Build with Gen AI",
+    group: "Build with GenAI",
     items: [
       { value: "assistant", rung: 2, label: "Use an agentic coding tool daily (Claude Code, Cursor, Codex, Copilot agent)" },
       { value: "rules", rung: 2, label: "Set up rules, skills or custom commands (CLAUDE.md, AGENTS.md, Cursor rules)" },
@@ -106,7 +106,7 @@ export const EXPOSURE = [
     ],
   },
   {
-    group: "Build Gen AI apps",
+    group: "Build GenAI apps",
     items: [
       { value: "api", rung: 4, label: "Called an LLM API from code (OpenAI, Anthropic, Bedrock, Azure OpenAI)" },
       { value: "rag", rung: 4, label: "Built a simple RAG or chatbot (embeddings, chunking, vector search)" },
@@ -114,10 +114,10 @@ export const EXPOSURE = [
     ],
   },
   {
-    group: "Architect Gen AI apps",
+    group: "Architect GenAI apps",
     items: [
       { value: "multiagent", rung: 5, label: "Designed an agentic or multi-agent system" },
-      { value: "prod", rung: 5, label: "Run evals and observability on a production Gen AI feature" },
+      { value: "prod", rung: 5, label: "Run evals and observability on a production GenAI feature" },
       { value: "choose", rung: 5, label: "Chose between prompting, RAG, NL2SQL and fine-tuning for a real problem" },
     ],
   },

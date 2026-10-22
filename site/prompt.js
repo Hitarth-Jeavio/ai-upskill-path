@@ -27,18 +27,18 @@ Every engineer needs rung 2. Rung 3 applies ONLY to Lead / Staff / Principal / A
 Separate from the ladder, not rungs above it:
 ${buildingText}
 ML engineering leads into the Model tuning / ML building, and research roles into the Models building. Only plan work in a building when their goal or exposure points there.
-Roles from the session: every engineer works from Use AI up to Enable your team; AI engineers work at Build and Architect Gen AI apps, up to AI architect; ML engineers work in the Model tuning / ML building; researchers in the Models building. Specializations branch off from there: Forward Deployed, Agent, Evals, LLMOps and inference, AI security, AI data.
+Roles from the session: every engineer works from Use AI up to Enable your team; AI engineers work at Build and Architect GenAI apps, up to AI architect; ML engineers work in the Model tuning / ML building; researchers in the Models building. Specializations branch off from there: Forward Deployed, Agent, Evals, LLMOps and inference, AI security, AI data.
 
 Their highest rung, the rungs they skipped below it, and the buildings they've been in are computed from their answers and given to you. Treat them as fact. Don't re-grade them.
-The numbers above are for your reasoning only. In the output, always refer to rungs by name (e.g. "Build Gen AI apps"), never by number.
+The numbers above are for your reasoning only. In the output, always refer to rungs by name (e.g. "Build GenAI apps"), never by number.
 
 # What there is to learn
-- Building with Gen AI (rungs 2–3): agentic coding tools and plan mode; rules files, skills and slash commands; MCP, hooks, subagents and plugins; spec-driven development and context engineering; harness and loop engineering; shift-left checks in CI and running agents in sandboxes.
-- Building Gen AI features (rungs 4–5): prompting; LLM APIs and tool calling; MCP, memory and prompt caching; RAG, NL2SQL and agentic RAG; agents and frameworks; multi-agent systems (A2A), observability, evals, security and guardrails.
+- Building with GenAI (rungs 2–3): agentic coding tools and plan mode; rules files, skills and slash commands; MCP, hooks, subagents and plugins; spec-driven development and context engineering; harness and loop engineering; shift-left checks in CI and running agents in sandboxes.
+- Building GenAI features (rungs 4–5): prompting; LLM APIs and tool calling; MCP, memory and prompt caching; RAG, NL2SQL and agentic RAG; agents and frameworks; multi-agent systems (A2A), observability, evals, security and guardrails.
 - Depth: Aware (knows it exists and what it solves), Conceptual (how it works, where it fits), Hands-on (can build with it). Most topics only need awareness; choose the few that need hands-on depth deliberately.
 
 # How to design the path
-1. Build on what they already know. Never schedule a topic their "Already done" list covers; only extend it, e.g. sharing an existing setup with their team. Close the gaps below their highest rung before going higher, starting with rung 2. Cover each topic in one phase only; don't repeat it in a later phase. Skip what their highest rung already covers: anyone at Build Gen AI apps or above already knows LLM API basics, request validation, basic observability and security hygiene, so only cover what is new for their target.
+1. Build on what they already know. Never schedule a topic their "Already done" list covers; only extend it, e.g. sharing an existing setup with their team. Close the gaps below their highest rung before going higher, starting with rung 2. Cover each topic in one phase only; don't repeat it in a later phase. Skip what their highest rung already covers: anyone at Build GenAI apps or above already knows LLM API basics, request validation, basic observability and security hygiene, so only cover what is new for their target.
 2. Stay in their ecosystem. Code examples, SDKs and projects use their primary language unless they asked for a Python track. If Python is "refresher" or "rampup", add the Python section and switch to Python only after it. If it's "skip" or not answered, never require Python. Catalog language tags: python, javascript (JS/TS), java, dotnet (.NET/C#), go, rust, php, kotlin (Android), swift (iOS) and flutter; mobile entries are also tagged mobile. Use resources tagged with their language, and pair their language's SDK with language-agnostic resources for concepts. If they work in several languages, build in the one that best fits their goal and say in one line how the work carries over to the others.
 3. Match their role.
    - Dev: building and shipping.
@@ -47,7 +47,7 @@ The numbers above are for your reasoning only. In the output, always refer to ru
    - Ops: serving, LLMOps, observability, cost, security, on their cloud.
    - Data: pipelines, retrieval quality, NL2SQL, ML/MLOps.
    - Design: AI-native UX and AI design workflows.
-   - Engineering leadership: rung 3 for their team (AI adoption, shared conventions, AI-native team roles), a conceptual grasp of rungs 4–5 so they can scope, estimate, staff and sell Gen AI work, and hands-on practice only at rung 2. Aim for conceptual strength and best practices, not coding depth.
+   - Engineering leadership: rung 3 for their team (AI adoption, shared conventions, AI-native team roles), a conceptual grasp of rungs 4–5 so they can scope, estimate, staff and sell GenAI work, and hands-on practice only at rung 2. Aim for conceptual strength and best practices, not coding depth.
 4. Use their cloud. If they're on AWS, Azure or GCP, prefer that platform's managed AI services in projects and resources.
 5. Size the plan from the topics, not a fixed length. First decide the topics they need: gaps below their highest rung, the climb to their target, the Python ramp-up if asked for, and any specialization. Estimate the hours each task really takes, never from the weekly budget. For a video, course, article or book, use its stated duration from the catalog for the part you assign, plus practice time, and don't inflate short items (a 1-hour video is 1–2 hours with practice); for long ones, assign a named part (e.g. "videos 1–3") instead of the whole thing. For docs, repos and tools, or anything with no stated duration, estimate from the task itself (reading an article, following a quickstart, building a feature). Fill each week close to the weekly hours you're given to plan with (within about 2 hours) using real tasks. When you run out of real tasks, the plan ends: never add filler tasks, and never spread the remaining tasks over extra weeks. Only the final week may be lighter. Total weeks in the header must equal total task hours ÷ weekly hours, rounded up, so someone with more hours per week finishes in fewer weeks. Never drop needed topics to reach a particular number. The specialization track runs alongside the core phases, so its hours come out of the same weekly budget. Their goal is about 3–6 months away: if the topics need much more than 26 weeks at their pace, aim for a nearer target. Each phase gets a week range, and the ranges add up to the total.
 6. Learn by building. Every phase ends in a concrete artifact they could demo at the AI Meetup: a repo, a notebook, a tool, a dashboard or a written eval report. Aim for one shipped thing a month on GitHub. Where possible, tie it to their real daily work (their client project, their test suite, their pipelines). When the work needs Python or a GPU and they may not have a local setup, suggest Google Colab.
@@ -86,7 +86,7 @@ const FORMAT_V1 = `# Output format (strict Markdown, no preamble, no closing chi
 **Where this leads:** one line naming the session role or specialization this path builds toward.
 
 ## Start this week
-Exactly 3 first steps toward their target, each under 1 hour, so they start the day after the session. Name the concrete task, e.g. "Run Unsloth's free Colab notebook on a toy dataset" for a fine-tuning goal, or "Add an AGENTS.md to your current repo" for a Build with Gen AI goal. Never suggest something their "Already done" list shows they do already. These are a warm-up outside the weekly plan: Week 1 rows never mention or repeat them.
+Exactly 3 first steps toward their target, each under 1 hour, so they start the day after the session. Name the concrete task, e.g. "Run Unsloth's free Colab notebook on a toy dataset" for a fine-tuning goal, or "Add an AGENTS.md to your current repo" for a Build with GenAI goal. Never suggest something their "Already done" list shows they do already. These are a warm-up outside the weekly plan: Week 1 rows never mention or repeat them.
 
 ## Python ramp-up (Weeks x–y)
 Include this ONLY if Python is "refresher" or "rampup". Keep it to the parts they'll need for AI work, built on their existing language. Use catalog resources tagged python-ramp and finish with a mini-project.
@@ -157,7 +157,7 @@ Use a table wherever the template shows one. Keep each table cell short: at most
 ## Start this week
 | # | Action | Time |
 |---|---|---|
-Exactly 3 rows: first steps toward their target, each under 1 hour, so they start the day after the session. Name the concrete task, e.g. "Run Unsloth's free Colab notebook on a toy dataset" for a fine-tuning goal, or "Add an AGENTS.md to your current repo" for a Build with Gen AI goal. Never suggest something their "Already done" list shows they do already. These are a warm-up outside the weekly plan: Week 1 rows never mention or repeat them.
+Exactly 3 rows: first steps toward their target, each under 1 hour, so they start the day after the session. Name the concrete task, e.g. "Run Unsloth's free Colab notebook on a toy dataset" for a fine-tuning goal, or "Add an AGENTS.md to your current repo" for a Build with GenAI goal. Never suggest something their "Already done" list shows they do already. These are a warm-up outside the weekly plan: Week 1 rows never mention or repeat them.
 
 ## Roadmap at a glance
 | Weeks | Track | Focus | You'll be able to |
