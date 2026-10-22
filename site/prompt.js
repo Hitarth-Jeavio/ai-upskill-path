@@ -9,9 +9,9 @@ const PACE = {
   "10+": { hoursPerWeek: "10+", planWith: 12 },
 };
 
-const catalogText = CATALOG.map(
-  (c) => `${c.url} | ${c.title} | tags: ${c.tags.join(", ")} | ${c.free ? "free" : "paid"} | ${c.format} | ${c.kind} | ${c.duration || "–"}`
-).join("\n");
+const catalogLine = (c) => `${c.url} | ${c.title} | ${c.tags.join(", ")} | ${c.format}${c.duration ? `, ${c.duration}` : ""}${c.free ? "" : ", paid"}`;
+const catalogSection = (entries) => `# CATALOG (url | title | tags | format, stated duration, "paid" if not free)
+${entries.map(catalogLine).join("\n")}`;
 
 const rungText = RUNGS.filter((r) => r.level > 0).map((r) => `- Rung ${r.level} — ${r.name}: ${r.blurb}`).join("\n");
 const buildingText = BUILDINGS.map((b) => `- Building — ${b.name}: ${b.blurb}`).join("\n");
@@ -49,7 +49,7 @@ The numbers above are for your reasoning only. In the output, always refer to ru
    - Design: AI-native UX and AI design workflows.
    - Engineering leadership: rung 3 for their team (AI adoption, shared conventions, AI-native team roles), a conceptual grasp of rungs 4–5 so they can scope, estimate, staff and sell Gen AI work, and hands-on practice only at rung 2. Aim for conceptual strength and best practices, not coding depth.
 4. Use their cloud. If they're on AWS, Azure or GCP, prefer that platform's managed AI services in projects and resources.
-5. Size the plan from the topics, not a fixed length. First decide the topics they need: gaps below their highest rung, the climb to their target, the Python ramp-up if asked for, and any specialization. Estimate the hours each task really takes, never from the weekly budget. For a "learn" resource, use its stated duration from the catalog for the part you assign, plus practice time, and don't inflate short items (a 1-hour video is 1–2 hours with practice); for long ones, assign a named part (e.g. "videos 1–3") instead of the whole thing. For a "reference" resource, or one with no stated duration, estimate from the task itself (reading an article, following a quickstart, building a feature). Fill each week close to the weekly hours you're given to plan with (within about 2 hours) using real tasks. When you run out of real tasks, the plan ends: never add filler tasks, and never spread the remaining tasks over extra weeks. Only the final week may be lighter. Total weeks in the header must equal total task hours ÷ weekly hours, rounded up, so someone with more hours per week finishes in fewer weeks. Never drop needed topics to reach a particular number. The specialization track runs alongside the core phases, so its hours come out of the same weekly budget. Their goal is about 3–6 months away: if the topics need much more than 26 weeks at their pace, aim for a nearer target. Each phase gets a week range, and the ranges add up to the total.
+5. Size the plan from the topics, not a fixed length. First decide the topics they need: gaps below their highest rung, the climb to their target, the Python ramp-up if asked for, and any specialization. Estimate the hours each task really takes, never from the weekly budget. For a video, course, article or book, use its stated duration from the catalog for the part you assign, plus practice time, and don't inflate short items (a 1-hour video is 1–2 hours with practice); for long ones, assign a named part (e.g. "videos 1–3") instead of the whole thing. For docs, repos and tools, or anything with no stated duration, estimate from the task itself (reading an article, following a quickstart, building a feature). Fill each week close to the weekly hours you're given to plan with (within about 2 hours) using real tasks. When you run out of real tasks, the plan ends: never add filler tasks, and never spread the remaining tasks over extra weeks. Only the final week may be lighter. Total weeks in the header must equal total task hours ÷ weekly hours, rounded up, so someone with more hours per week finishes in fewer weeks. Never drop needed topics to reach a particular number. The specialization track runs alongside the core phases, so its hours come out of the same weekly budget. Their goal is about 3–6 months away: if the topics need much more than 26 weeks at their pace, aim for a nearer target. Each phase gets a week range, and the ranges add up to the total.
 6. Learn by building. Every phase ends in a concrete artifact they could demo at the AI Meetup: a repo, a notebook, a tool, a dashboard or a written eval report. Aim for one shipped thing a month on GitHub. Where possible, tie it to their real daily work (their client project, their test suite, their pipelines). When the work needs Python or a GPU and they may not have a local setup, suggest Google Colab.
 7. Go deep on specializations. If they chose any, give the specialization track concrete subtopics, a project and resources for those exact areas.
 8. Leadership add-on. If their scope includes Delivery or People, or their role is Engineering leadership, add the lead section. Title it "For your lead role" for Lead / Staff / Principal / Architect, EM and above, or Engineering leadership; otherwise title it "For your delivery role". Cover estimating and scoping AI work, AI adoption in the team, reviewing AI-generated code and output, and data privacy with clients.
@@ -58,11 +58,11 @@ The numbers above are for your reasoning only. In the output, always refer to ru
 11. Make every task actionable and self-contained. One main action per row; don't bundle several steps with semicolons, and never refer to other sections by a made-up name. If a task has no resource, name the tool or method it uses. If a task depends on a managed, console or no-code route, add what to do if it isn't available (another region, model or service). Merge or drop vague chores such as "final hardening" or "experiment review". Use each resource at most once per phase, and don't use the same additional source in more than one phase.
 12. Close the loop the session teaches: Consume, Build, Share. Every phase ends with something they share, and the capstone uses Jeavio-style client work with synthetic or public data, never real client data.
 13. Write in plain language. The first time a task uses a term that is new for their target area (e.g. data leakage, model card, LoRA rank), explain it in a few words in brackets, e.g. "leakage (the same ticket in train and test)".
+14. Stay-current picks fit the person. Choose newsletters and X accounts whose tags match their goal, role and specializations, not the same defaults for everyone: e.g. fine-tuning or models goals → research and fine-tuning sources; RAG or document work → RAG sources; AI-assisted coding → ai-coding sources; Product, Design and Engineering leadership → productivity, product and leadership sources, which are less technical.
 
 `;
 
-const CATALOG_SECTION = `# CATALOG (url | title | tags | cost | format | kind | stated duration)
-${catalogText}`;
+const CATALOG_SECTION = catalogSection(CATALOG);
 
 // v1: Markdown prose with phase sections.
 const RESOURCE_RULES_V1 = `# Resource rules (strict)
@@ -116,7 +116,7 @@ One project that pulls the path together, in their ecosystem, on their cloud and
 Include this ONLY when scope includes Delivery or People, or their role is Engineering leadership. 4–6 bullets.
 
 ## Keep growing
-3 bullets: how to stay current (pick from catalog items tagged stay-current), a habit to keep, and an invitation to share what they build at the next Jeavio AI Meetup session.
+4 bullets: one newsletter and two people to follow on X (catalog items tagged stay-current, chosen per rule 14, each with a few words on why it fits them), a weekly habit, and an invitation to share what they build at the next Jeavio AI Meetup session.
 
 # Style
 Direct, practical, encouraging. Write to them as "you". No hype and no "AI is transforming the world" intros. Aim for 900–1500 words in total. Use bold sparingly. Use US English spelling (e.g. optimization, behavior).
@@ -207,17 +207,53 @@ Include this ONLY when scope includes Delivery or People, or their role is Engin
 ## Keep growing
 | Habit | How |
 |---|---|
-Exactly 3 rows: one stay-current source (a linked catalog item tagged stay-current), one weekly habit, and sharing what they build at the next Jeavio AI Meetup session.
+Exactly 4 rows, in this order: Newsletter (one linked catalog newsletter tagged stay-current), Follow on X (two linked catalog X accounts, format social, tagged stay-current), Weekly habit, and Share (what they build, at the next Jeavio AI Meetup session). Choose the newsletter and accounts per rule 14 and say in a few words why each fits them.
 
 # Style
 Direct, practical, encouraging. Write to them as "you". No hype and no "AI is transforming the world" intros. The tables carry the detail; keep text outside tables short. Use bold only where the template shows it. Use US English spelling (e.g. optimization, behavior).
 
 `;
 
-const SYSTEM_PROMPTS = {
-  v1: RULES + RESOURCE_RULES_V1 + FORMAT_V1 + CATALOG_SECTION,
-  v2: RULES + RESOURCE_RULES_V2 + FORMAT_V2 + CATALOG_SECTION,
+const PARTS = {
+  v1: RULES + RESOURCE_RULES_V1 + FORMAT_V1,
+  v2: RULES + RESOURCE_RULES_V2 + FORMAT_V2,
 };
+const SYSTEM_PROMPTS = { v1: PARTS.v1 + CATALOG_SECTION, v2: PARTS.v2 + CATALOG_SECTION };
+
+const LANG_TAGS = {
+  "Python": ["python"], "JavaScript / TypeScript": ["javascript"], "Java": ["java"], ".NET / C#": ["dotnet"],
+  "Go": ["go"], "Rust": ["rust"], "PHP": ["php"],
+  "Android (Kotlin)": ["kotlin", "mobile"], "iOS (Swift)": ["swift", "mobile"], "Flutter": ["flutter", "mobile"],
+};
+const ALL_LANG = ["python", "python-ramp", "javascript", "java", "dotnet", "go", "rust", "php", "kotlin", "swift", "flutter", "mobile"];
+const CLOUD_TAGS = { AWS: "aws", Azure: "azure", GCP: "gcp" };
+// Niche topics only included when the matching specialization is chosen.
+const SPECIALTY = {
+  voice: /voice/i, "computer-vision": /computer vision/i, surveillance: /computer vision|surveillance/i,
+  "document-extraction": /document/i, "edge-ai": /edge|on-device/i, "frontend-ai": /frontend/i,
+};
+const ML_TAGS = ["fine-tuning", "deep-learning", "research", "ml-foundations", "mlops"];
+
+// Drops resources for other languages, other clouds, unchosen niches and (unless relevant) model-building depth.
+export function relevantCatalog(profile) {
+  const langs = new Set(profile.languages.flatMap((l) => LANG_TAGS[l] || []));
+  if (["strong", "refresher", "rampup"].includes(profile.python)) langs.add("python");
+  if (["refresher", "rampup"].includes(profile.python)) langs.add("python-ramp");
+  const clouds = new Set(profile.cloud.map((c) => CLOUD_TAGS[c]).filter(Boolean));
+  const specText = [...profile.specializations, profile.otherSpecialization].join(" ");
+  const wantsML = profile.goal === "models" || profile.role === "data" || /ML|MLOps|fine-tun|model/i.test(specText);
+  return CATALOG.filter((c) => {
+    if (c.tags.includes("stay-current")) return true;
+    const lang = c.tags.filter((t) => ALL_LANG.includes(t));
+    if (lang.length && !lang.some((t) => langs.has(t))) return false;
+    const cloud = c.tags.filter((t) => ["aws", "azure", "gcp"].includes(t));
+    if (cloud.length && !cloud.some((t) => clouds.has(t))) return false;
+    const topics = c.tags.filter((t) => !ALL_LANG.includes(t) && !["aws", "azure", "gcp", "colab"].includes(t));
+    if (topics.length && topics.every((t) => SPECIALTY[t]) && !topics.some((t) => SPECIALTY[t].test(specText))) return false;
+    if (!wantsML && topics.length && topics.every((t) => ML_TAGS.includes(t))) return false;
+    return true;
+  });
+}
 
 export const PROMPT_VERSIONS = Object.keys(SYSTEM_PROMPTS);
 export const DEFAULT_PROMPT_VERSION = "v2";
@@ -261,4 +297,13 @@ Write their learning path now, following the output format exactly.`;
 }
 
 // For the "paste into your own AI" fallback.
-export const buildFullPrompt = (profile, version) => `${getSystemPrompt(version)}\n\n---\n\n${buildUserPrompt(profile)}`;
+export const buildFullPrompt = (profile, version) =>
+  `${PARTS[resolveVersion(version)]}${catalogSection(relevantCatalog(profile))}\n\n---\n\n${buildUserPrompt(profile)}`;
+
+// Plain-ASCII punctuation keeps "?q=" links short (each typographic dash costs 9 characters when encoded).
+const ASCII = { "—": "-", "–": "-", "→": "->", "’": "'", "‘": "'", "“": '"', "”": '"', "…": "...", "×": "x", "·": "-", "≈": "~" };
+// plusSpaces: "+" for spaces (ChatGPT decodes it; saves ~15% of the link).
+export const promptLink = (base, prompt, plusSpaces = false) => {
+  const q = encodeURIComponent(prompt.replace(/[—–→’‘“”…×·≈]/g, (ch) => ASCII[ch]));
+  return base + (plusSpaces ? q.replace(/%20/g, "+") : q);
+};

@@ -1,5 +1,5 @@
 import { FIELDS, EXPOSURE, SPECIALIZATIONS, RUNGS, BUILDINGS, REQUIRED, TEAM_RUNG, normalizeProfile, computeLadder, teamRungApplies, labelOf } from "./questions.js";
-import { buildFullPrompt, resolveVersion } from "./prompt.js";
+import { buildFullPrompt, promptLink, resolveVersion } from "./prompt.js";
 
 const WORKER_URL = (window.APP_CONFIG?.WORKER_URL || "").replace(/\/$/, "");
 // ?v=1 or ?v=v2 overrides config.js, e.g. to compare prompt versions side by side.
@@ -351,6 +351,24 @@ function setStatus(msg, isError = false) {
   s.classList.toggle("error", isError);
 }
 
+// Longest links each site accepted in testing (ChatGPT rejects ~73k with 414). Longer prompts fall back to paste.
+const LINK_LIMITS = { chatgpt: 56000, claude: 60000 };
+
+// ChatGPT opens and sends "?q="; Claude opens with it filled in; Gemini has no such link, so it's paste only.
+function setAssistantLinks(prompt) {
+  const chatgpt = promptLink("https://chatgpt.com/?q=", prompt, true);
+  const claude = promptLink("https://claude.ai/new?q=", prompt);
+  const gptFits = chatgpt.length <= LINK_LIMITS.chatgpt;
+  const claudeFits = claude.length <= LINK_LIMITS.claude;
+  $("#openChatGPT").href = gptFits ? chatgpt : "https://chatgpt.com/";
+  $("#openClaude").href = claudeFits ? claude : "https://claude.ai/new";
+  const how = [];
+  if (gptFits) how.push("ChatGPT opens and sends your prompt for you.");
+  if (claudeFits) how.push("Claude opens with your prompt filled in; press Enter.");
+  how.push(gptFits && claudeFits ? "For Gemini, paste the prompt and send it." : "Otherwise, paste the prompt and send it.");
+  $("#openHow").textContent = how.join(" ");
+}
+
 // Only claim "copied" when the clipboard accepted it; otherwise open the prompt to copy by hand.
 function setCopyState(ok) {
   $("#copyState").textContent = ok
@@ -599,6 +617,7 @@ function init() {
     if (promptOnly) {
       $("#fallback").hidden = true;
       $("#promptText").value = prompt;
+      setAssistantLinks(prompt);
       setCopyState(ok);
     } else {
       showFallback(profile, true);
