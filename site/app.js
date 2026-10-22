@@ -407,8 +407,10 @@ function applyProgress() {
 
 function refreshSavedBanner() {
   const saved = store.get(PATH_KEY);
-  $("#savedBanner").hidden = !saved?.markdown;
-  if (saved?.markdown) {
+  // In copy-prompt mode no paths are generated here, so don't offer old ones.
+  const show = !!WORKER_URL && !!saved?.markdown;
+  $("#savedBanner").hidden = !show;
+  if (show) {
     const day = new Date(saved.at).toLocaleDateString(undefined, { day: "numeric", month: "short" });
     $("#savedText").textContent = `You have a saved learning path from ${day}.`;
   }
