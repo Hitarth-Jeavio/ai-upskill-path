@@ -299,7 +299,3 @@ Write their learning path now, following the output format exactly.`;
 // For the "paste into your own AI" fallback.
 export const buildFullPrompt = (profile, version) =>
   `${PARTS[resolveVersion(version)]}${catalogSection(relevantCatalog(profile))}\n\n---\n\n${buildUserPrompt(profile)}`;
-
-// Plain-ASCII punctuation keeps "?q=" links short (each typographic dash costs 9 characters when encoded).
-const ASCII = { "—": "-", "–": "-", "→": "->", "’": "'", "‘": "'", "“": '"', "”": '"', "…": "...", "×": "x", "·": "-", "≈": "~" };
-export const promptLink = (base, prompt) => base + encodeURIComponent(prompt.replace(/[—–→’‘“”…×·≈]/g, (ch) => ASCII[ch]));
