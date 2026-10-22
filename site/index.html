@@ -38,7 +38,7 @@
 
       <dl class="summary" id="summary"></dl>
 
-      <p class="rail-foot">We don't store your answers. They're only sent to the AI to generate your path.</p>
+      <p class="rail-foot" id="railFoot">We don't store your answers. They're only sent to the AI to generate your path.</p>
     </aside>
 
     <main class="work">
@@ -119,7 +119,7 @@
       <div id="result" hidden>
         <header class="result-head">
           <div>
-            <p class="label c-orange">Your learning path</p>
+            <p class="label c-orange" id="resultEyebrow">Your learning path</p>
             <h2 id="resultTitle">Here's where you stand.</h2>
           </div>
           <div class="actions">
@@ -132,6 +132,47 @@
           </div>
         </header>
         <p class="status" id="status"></p>
+        <ol class="prompt-steps" id="promptSteps" hidden>
+          <li class="pstep">
+            <span class="pstep-num c-orange">1</span>
+            <div class="pstep-main">
+              <h3>Copy your prompt</h3>
+              <p class="pstep-state" id="copyState"></p>
+              <div class="pstep-actions">
+                <button class="btn btn-ghost" type="button" id="copyAgainBtn">Copy again</button>
+              </div>
+              <details class="prompt-view" id="promptView">
+                <summary>View the prompt</summary>
+                <textarea class="text" id="promptText" rows="8" readonly aria-label="Your prompt"></textarea>
+              </details>
+            </div>
+          </li>
+          <li class="pstep">
+            <span class="pstep-num c-teal">2</span>
+            <div class="pstep-main">
+              <h3>Paste it into your AI assistant</h3>
+              <div class="pstep-actions">
+                <a class="btn btn-dark" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Open ChatGPT ↗</a>
+                <a class="btn btn-ghost" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">Open Claude ↗</a>
+                <a class="btn btn-ghost" href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">Open Gemini ↗</a>
+              </div>
+              <p class="muted">Paste the prompt and send it. Your path takes about a minute to write. If your plan offers a "thinking" or reasoning model, choose it for a better path.</p>
+            </div>
+          </li>
+          <li class="pstep">
+            <span class="pstep-num c-green">3</span>
+            <div class="pstep-main">
+              <h3>Make it yours</h3>
+              <p class="muted">Ask follow-ups in the same chat, for example:</p>
+              <ul class="followups">
+                <li><span>Make week 1 lighter, I only have 2 hours that week.</span><button class="btn btn-link" type="button" data-copy>Copy</button></li>
+                <li><span>Explain any term in my plan I might not know, in one line each.</span><button class="btn btn-link" type="button" data-copy>Copy</button></li>
+                <li><span>Turn week 1 into a checklist I can tick off.</span><button class="btn btn-link" type="button" data-copy>Copy</button></li>
+              </ul>
+              <p class="muted">Keep the chat, or ask the assistant to export the plan as a table, so you can come back to it.</p>
+            </div>
+          </li>
+        </ol>
         <div class="progress-track" id="progressTrack" hidden>
           <div class="pt-bar" aria-hidden="true"><span id="ptFill"></span></div>
           <span id="ptText"></span>
@@ -142,11 +183,8 @@
           <article class="timeline" id="output" aria-live="polite"></article>
         </div>
 
-        <section class="connect" aria-labelledby="connectTitle">
-          <div>
-            <p class="label c-orange">Stay connected</p>
-            <h3 id="connectTitle">Keep learning with the Jeavio AI Meetup</h3>
-          </div>
+        <section class="connect" aria-label="Stay connected">
+          <p class="label">Stay connected with the Jeavio AI Meetup</p>
           <div class="connect-links">
             <a class="btn btn-ghost" href="https://www.linkedin.com/showcase/jeavio-ai-meetup/posts/" target="_blank" rel="noopener noreferrer">AI Meetup on LinkedIn ↗</a>
             <a class="btn btn-ghost" href="https://www.youtube.com/channel/UCm4uVHdUai1SUwFLpRLQ1Hw" target="_blank" rel="noopener noreferrer">Jeavio on YouTube ↗</a>

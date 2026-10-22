@@ -184,6 +184,7 @@ textarea.text { resize: vertical; }
 .actions .btn { padding: 12px 18px; font-size: 14px; }
 .status { color: var(--muted); font-size: 14px; margin: 14px 0 0; min-height: 1.4em; }
 .status.error { color: var(--orange); font-weight: 500; }
+.status:empty { min-height: 0; margin: 0; }
 
 .result-body { display: grid; grid-template-columns: 200px 1fr; gap: 40px; margin-top: 24px; }
 .toc { position: sticky; top: 24px; align-self: start; display: flex; flex-direction: column; gap: 2px; }
@@ -242,10 +243,25 @@ details.plan > p { margin: 10px 0 0; padding: 0 14px 12px; }
 .task-box, .timeline li > input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
 .timeline tr:has(.task-box:checked) td:not(.done-cell) { color: var(--muted); text-decoration: line-through; }
 .timeline li:has(> input[type="checkbox"]:checked) { color: var(--muted); text-decoration: line-through; }
-.connect { display: flex; justify-content: space-between; align-items: center; gap: 16px 24px; flex-wrap: wrap; margin-top: 32px; padding: 20px 22px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); }
-.connect h3 { font-size: 18px; }
-.connect-links { display: flex; gap: 10px; flex-wrap: wrap; }
-.connect-links .btn { padding: 10px 14px; font-size: 14px; }
+.prompt-steps { list-style: none; margin: 24px 0 0; padding: 0; display: grid; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--card); }
+.pstep { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; padding: 22px 24px; }
+.pstep + .pstep { border-top: 1px solid var(--line); }
+.pstep-num { display: grid; place-items: center; width: 32px; height: 32px; border: 1.5px solid currentColor; border-radius: 50%; font-weight: 700; font-variant-numeric: tabular-nums; }
+.pstep-main { display: grid; gap: 10px; min-width: 0; }
+.pstep-main h3 { font-size: 18px; }
+.pstep-main p { margin: 0; }
+.pstep-state { font-weight: 600; color: var(--green); }
+.pstep-state.warn { color: var(--orange); }
+.pstep-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.pstep-actions .btn { padding: 11px 16px; font-size: 14px; }
+.prompt-view summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--teal); }
+.prompt-view textarea { margin-top: 10px; font-family: ui-monospace, monospace; font-size: 12px; }
+.followups { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.followups li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); font-size: 14px; }
+.followups .btn-link { padding: 2px 0; font-size: 13px; flex: none; }
+.connect { display: flex; align-items: center; gap: 8px 16px; flex-wrap: wrap; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); }
+.connect-links { display: flex; gap: 6px 16px; flex-wrap: wrap; }
+.connect-links .btn { padding: 4px 0; border: 0; font-size: 14px; text-decoration: underline; text-underline-offset: 4px; }
 .fallback { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); }
 .fallback summary { cursor: pointer; font-weight: 600; color: var(--text-strong); }
 .fallback textarea { margin-top: 10px; font-family: ui-monospace, monospace; font-size: 12px; }
@@ -302,6 +318,8 @@ details.plan > p { margin: 10px 0 0; padding: 0 14px 12px; }
   #copyPromptBtn { order: 2; width: 100%; padding: 4px 0; }
   #copyPromptBtn.btn-primary { padding: 14px 18px; }
   .tl-item { padding-left: 28px; }
+  .pstep { grid-template-columns: 1fr; gap: 10px; padding: 18px 16px; }
+  .pstep-actions .btn { flex: 1 1 100%; }
   .tl-body { padding: 16px; }
   .timeline table { min-width: 560px; }
   .result-head .actions { width: 100%; }
@@ -310,7 +328,7 @@ details.plan > p { margin: 10px 0 0; padding: 0 14px 12px; }
 /* Print: only the path */
 @media print {
   .app { display: block; }
-  .rail, #wizard, .actions, .status, .toc, .fallback, .toast, .result-head, .progress-track, .connect { display: none !important; }
+  .rail, #wizard, .actions, .status, .toc, .fallback, .toast, .result-head, .progress-track, .connect, .prompt-steps { display: none !important; }
   details.plan > summary { display: none; }
   .work { padding: 0; max-width: none; }
   .result-body { display: block; margin: 0; }

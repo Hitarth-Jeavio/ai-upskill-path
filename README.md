@@ -88,6 +88,7 @@ For local runs, temporarily set `WORKER_URL: "http://localhost:8787"` in `site/c
   ```bash
   node --input-type=module -e 'import("./site/catalog.js").then(async ({CATALOG})=>{for(const c of CATALOG){const r=await fetch(c.url,{redirect:"follow"}).catch(e=>({status:e.message}));if(r.status!==200)console.log(r.status,c.id,c.url)}})'
   ```
+- **Copy-prompt only:** set `WORKER_URL: ""` in `site/config.js` to turn off generation with our key. Attendees then copy the prompt into their own ChatGPT, Claude or Gemini. Put the Worker URL back to turn generation on again.
 - **Prompt:** edit `site/prompt.js`, then redeploy **both** the site (push) and the Worker (`npx wrangler deploy`). The Worker bundles its own copy of the prompt.
 
 ## Prompt versions

@@ -227,10 +227,18 @@ function validateAll() {
   return null;
 }
 
-function showResult(profile) {
+function showResult(profile, promptOnly = false) {
   $("#wizard").hidden = true;
   $("#result").hidden = false;
-  $("#resultTitle").textContent = profile.name ? `${profile.name}, here's your path.` : "Here's your path.";
+  // In copy-prompt mode there's no generated path on this page, only the prompt to paste elsewhere.
+  document.querySelector(".result-body").hidden = promptOnly;
+  $("#promptSteps").hidden = !promptOnly;
+  $("#resultEyebrow").textContent = promptOnly ? "Your prompt" : "Your learning path";
+  if (promptOnly) {
+    $("#resultTitle").textContent = profile.name ? `${profile.name}, your prompt is ready.` : "Your prompt is ready.";
+  } else {
+    $("#resultTitle").textContent = profile.name ? `${profile.name}, here's your path.` : "Here's your path.";
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -343,8 +351,22 @@ function setStatus(msg, isError = false) {
   s.classList.toggle("error", isError);
 }
 
+// Only claim "copied" when the clipboard accepted it; otherwise open the prompt to copy by hand.
+function setCopyState(ok) {
+  $("#copyState").textContent = ok
+    ? "✓ Copied to your clipboard."
+    : "Your browser blocked copying. Open the prompt below, select all of it and copy it.";
+  $("#copyState").classList.toggle("warn", !ok);
+  $("#promptView").open = !ok;
+  if (!ok) $("#promptText").select();
+}
+
 function showFallback(profile, open = false) {
   $("#fallbackText").value = buildFullPrompt(profile, PROMPT_VERSION);
+  $("#fallback summary").textContent = WORKER_URL ? "Run it in your own AI assistant" : "Your prompt";
+  $("#fallback p").textContent = WORKER_URL
+    ? "Paste this prompt into ChatGPT, Claude or Gemini to get a similar path."
+    : "Paste this prompt into ChatGPT, Claude or Gemini to get your learning path.";
   $("#fallback").hidden = false;
   $("#fallback").open = open;
 }
@@ -457,7 +479,10 @@ async function copyText(text, okMsg) {
 function init() {
   renderStatic();
 
-  if (!WORKER_URL) $("#copyPromptBtn").className = "btn btn-primary";
+  if (!WORKER_URL) {
+    $("#copyPromptBtn").className = "btn btn-primary";
+    $("#railFoot").textContent = "We don't store your answers. Nothing leaves this page until you paste the prompt into your own AI assistant.";
+  }
 
   restoreForm(store.get(STORE_KEY));
   updateRail();
@@ -472,6 +497,8 @@ function init() {
     openPlans.clear();
     $("#wizard").hidden = true;
     $("#result").hidden = false;
+    document.querySelector(".result-body").hidden = false;
+    $("#promptSteps").hidden = true;
     $("#resultTitle").textContent = saved.title;
     $("#actions").hidden = false;
     $("#fallback").hidden = true;
@@ -546,6 +573,7 @@ function init() {
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!WORKER_URL) return $("#copyPromptBtn").click();
     const profile = validateAll();
     if (!profile) return;
     showResult(profile);
@@ -555,11 +583,25 @@ function init() {
   $("#copyPromptBtn").addEventListener("click", async () => {
     const profile = validateAll();
     if (!profile) return;
-    showResult(profile);
-    setStatus(WORKER_URL ? "" : "Paste the prompt into ChatGPT, Claude or Gemini to get your path.");
-    showFallback(profile, true);
-    const ok = await copyText(buildFullPrompt(profile, PROMPT_VERSION), "Prompt copied. Paste it into ChatGPT, Claude or Gemini.");
-    if (!ok) $("#fallbackText").select();
+    const promptOnly = !WORKER_URL;
+    if (promptOnly) {
+      markdown = "";
+      $("#output").replaceChildren();
+      $("#actions").hidden = true;
+      $("#progressTrack").hidden = true;
+    }
+    showResult(profile, promptOnly);
+    const prompt = buildFullPrompt(profile, PROMPT_VERSION);
+    const ok = await copyText(prompt, "Prompt copied. Paste it into ChatGPT, Claude or Gemini.");
+    setStatus("");
+    if (promptOnly) {
+      $("#fallback").hidden = true;
+      $("#promptText").value = prompt;
+      setCopyState(ok);
+    } else {
+      showFallback(profile, true);
+      if (!ok) $("#fallbackText").select();
+    }
   });
 
   $("#editBtn").addEventListener("click", () => {
@@ -569,6 +611,13 @@ function init() {
     goTo(steps.length - 1);
   });
   $("#copyBtn").addEventListener("click", () => copyText(markdown, "Path copied as Markdown."));
+  $("#copyAgainBtn").addEventListener("click", async () => setCopyState(await copyText($("#promptText").value, "Prompt copied.")));
+  $("#promptSteps").addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-copy]");
+    if (!btn) return;
+    const ok = await copyText(btn.previousElementSibling.textContent, "Follow-up copied.");
+    btn.textContent = ok ? "Copied ✓" : "Copy";
+  });
   $("#printBtn").addEventListener("click", () => window.print());
   $("#downloadBtn").addEventListener("click", () => {
     const a = el("a", { href: URL.createObjectURL(new Blob([markdown], { type: "text/markdown" })), download: "my-ai-learning-path.md" });
