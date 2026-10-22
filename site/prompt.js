@@ -302,8 +302,4 @@ export const buildFullPrompt = (profile, version) =>
 
 // Plain-ASCII punctuation keeps "?q=" links short (each typographic dash costs 9 characters when encoded).
 const ASCII = { "—": "-", "–": "-", "→": "->", "’": "'", "‘": "'", "“": '"', "”": '"', "…": "...", "×": "x", "·": "-", "≈": "~" };
-// plusSpaces: "+" for spaces (ChatGPT decodes it; saves ~15% of the link).
-export const promptLink = (base, prompt, plusSpaces = false) => {
-  const q = encodeURIComponent(prompt.replace(/[—–→’‘“”…×·≈]/g, (ch) => ASCII[ch]));
-  return base + (plusSpaces ? q.replace(/%20/g, "+") : q);
-};
+export const promptLink = (base, prompt) => base + encodeURIComponent(prompt.replace(/[—–→’‘“”…×·≈]/g, (ch) => ASCII[ch]));
