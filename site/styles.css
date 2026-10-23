@@ -259,8 +259,12 @@ details.plan > p { margin: 10px 0 0; padding: 0 14px 12px; }
 .pstep-state.warn { color: var(--orange); }
 .pstep-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .pstep-actions .btn { padding: 11px 16px; font-size: 14px; }
-.prompt-view summary { cursor: pointer; font-size: 14px; font-weight: 600; color: var(--teal); }
-.prompt-view textarea { margin-top: 10px; font-family: ui-monospace, monospace; font-size: 12px; }
+.pstep-split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px; align-items: start; }
+.pstep-col { display: grid; gap: 14px; align-content: start; }
+.prompt-summary { display: grid; gap: 12px; }
+.prompt-summary p { font-size: 15px; line-height: 1.5; }
+.prompt-summary strong { display: block; margin-bottom: 2px; font-size: 13px; color: var(--muted); }
+.prompt-text { height: 440px; font-family: ui-monospace, monospace; font-size: 12px; }
 .followups { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .followups li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 12px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); font-size: 14px; }
 .followups .btn-link { padding: 2px 0; font-size: 13px; flex: none; }
@@ -294,6 +298,8 @@ details.plan > p { margin: 10px 0 0; padding: 0 14px 12px; }
 /* Tablet and mobile: rail becomes a compact header */
 @media (max-width: 1000px) {
   .app { grid-template-columns: 1fr; }
+  .pstep-split { grid-template-columns: 1fr; gap: 16px; }
+  .prompt-text { height: 320px; }
   .rail { position: static; height: auto; padding: 22px 16px; gap: 18px; }
   .rail-intro h1 { font-size: 24px; }
   .map { grid-template-columns: 1fr; gap: 10px; }

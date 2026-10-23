@@ -137,16 +137,19 @@
         <ol class="prompt-steps" id="promptSteps" hidden>
           <li class="pstep">
             <span class="pstep-num c-orange">1</span>
-            <div class="pstep-main">
-              <h3>Copy your prompt</h3>
-              <p class="pstep-state" id="copyState"></p>
-              <div class="pstep-actions">
-                <button class="btn btn-ghost" type="button" id="copyAgainBtn">Copy again</button>
+            <div class="pstep-main pstep-split">
+              <div class="pstep-col">
+                <h3>Copy your prompt</h3>
+                <p class="pstep-state" id="copyState"></p>
+                <div class="prompt-summary">
+                  <p><strong>Who this prompt describes</strong><span id="summaryWho"></span></p>
+                  <p><strong>What it asks the AI for</strong><span id="summaryAsks"></span></p>
+                </div>
+                <div class="pstep-actions">
+                  <button class="btn btn-ghost" type="button" id="copyAgainBtn">Copy again</button>
+                </div>
               </div>
-              <details class="prompt-view" id="promptView">
-                <summary>View the prompt</summary>
-                <textarea class="text" id="promptText" rows="8" readonly aria-label="Your prompt"></textarea>
-              </details>
+              <textarea class="text prompt-text" id="promptText" readonly aria-label="Your prompt"></textarea>
             </div>
           </li>
           <li class="pstep">

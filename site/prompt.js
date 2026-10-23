@@ -319,6 +319,36 @@ Weekly time: ${pace.hoursPerWeek} hrs/week. Plan with ${pace.planWith} hrs/week 
 Write their learning path now, following the output format exactly.`;
 }
 
+const GOAL_TEXT = {
+  productivity: "get much faster at your daily work with AI tools",
+  build_apps: "build GenAI features and agents into products",
+  models: "go deep into ML, fine-tuning and model engineering",
+  lead_adoption: "lead AI adoption for your team or clients",
+};
+const andList = (xs) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
+
+// Plain-language summary shown beside the prompt. States only what the prompt fixes, never the model's choices.
+export function promptSummary(profile) {
+  const ladder = computeLadder(profile);
+  const langs = profile.languages.filter((l) => l !== "None / not applicable");
+  const clouds = profile.cloud.filter((c) => c !== "Not sure / none");
+  const specs = [...profile.specializations, ...(profile.otherSpecialization ? profile.otherSpecialization.split("; ") : [])];
+  const where = ladder.highest.level ? `currently at ${ladder.highest.name}` : "just getting started with AI";
+  const who = `${labelOf("experience", profile.experience)}, ${labelOf("role", profile.role)}${langs.length ? ` working in ${andList(langs)}` : ""}${clouds.length ? ` on ${andList(clouds)}` : ""}, ${where}.`;
+  const leadRole = profile.role === "lead" || profile.scope !== "tech";
+  const covers = [
+    ladder.gaps.length && `closing your gaps in ${andList(ladder.gaps.map((r) => r.name))} first`,
+    specs.length && `a track on ${andList(specs)}`,
+    `a capstone project for a ${capstoneSector(profile)} client`,
+    leadRole && `tips for your ${profile.role === "lead" || teamRungApplies(profile) ? "lead" : "delivery"} role`,
+  ].filter(Boolean);
+  const python = ["refresher", "rampup"].includes(profile.python) ? ", starting with a Python ramp-up" : "";
+  return {
+    who,
+    asks: `A week-by-week plan to ${GOAL_TEXT[profile.goal]}, at ${PACE[profile.hours].hoursPerWeek} hrs a week${python}. It covers ${andList(covers)}. Every link comes from ${relevantCatalog(profile).length} curated resources picked for your profile.`,
+  };
+}
+
 // For the "paste into your own AI" fallback.
 export const buildFullPrompt = (profile, version) =>
   `${PARTS[resolveVersion(version)]}${catalogSection(relevantCatalog(profile))}\n\n---\n\n${buildUserPrompt(profile)}`;

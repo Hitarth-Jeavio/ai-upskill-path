@@ -1,5 +1,5 @@
 import { FIELDS, EXPOSURE, SPECIALIZATIONS, RUNGS, BUILDINGS, REQUIRED, TEAM_RUNG, MAX_OTHER_SPECS, cleanText, cleanOtherSpecs, normalizeProfile, computeLadder, teamRungApplies, labelOf } from "./questions.js";
-import { buildFullPrompt, resolveVersion } from "./prompt.js";
+import { buildFullPrompt, promptSummary, resolveVersion } from "./prompt.js";
 
 const WORKER_URL = (window.APP_CONFIG?.WORKER_URL || "").replace(/\/$/, "");
 // ?v=1 or ?v=v2 overrides config.js, e.g. to compare prompt versions side by side.
@@ -376,13 +376,12 @@ function setStatus(msg, isError = false) {
   s.classList.toggle("error", isError);
 }
 
-// Only claim "copied" when the clipboard accepted it; otherwise open the prompt to copy by hand.
+// Only claim "copied" when the clipboard accepted it; otherwise select the prompt to copy by hand.
 function setCopyState(ok) {
   $("#copyState").textContent = ok
     ? "✓ Copied to your clipboard."
-    : "Your browser blocked copying. Open the prompt below, select all of it and copy it.";
+    : "Your browser blocked copying. The prompt is selected, so copy it by hand.";
   $("#copyState").classList.toggle("warn", !ok);
-  $("#promptView").open = !ok;
   if (!ok) $("#promptText").select();
 }
 
@@ -628,6 +627,10 @@ function init() {
     if (promptOnly) {
       $("#fallback").hidden = true;
       $("#promptText").value = prompt;
+      $("#promptText").scrollTop = 0;
+      const summary = promptSummary(profile);
+      $("#summaryWho").textContent = summary.who;
+      $("#summaryAsks").textContent = summary.asks;
       setCopyState(ok);
     } else {
       showFallback(profile, true);
