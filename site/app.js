@@ -1,4 +1,4 @@
-import { FIELDS, EXPOSURE, SPECIALIZATIONS, RUNGS, BUILDINGS, REQUIRED, TEAM_RUNG, normalizeProfile, computeLadder, teamRungApplies, labelOf } from "./questions.js";
+import { FIELDS, EXPOSURE, SPECIALIZATIONS, RUNGS, BUILDINGS, REQUIRED, TEAM_RUNG, MAX_OTHER_SPECS, cleanText, cleanOtherSpecs, normalizeProfile, computeLadder, teamRungApplies, labelOf } from "./questions.js";
 import { buildFullPrompt, resolveVersion } from "./prompt.js";
 
 const WORKER_URL = (window.APP_CONFIG?.WORKER_URL || "").replace(/\/$/, "");
@@ -121,10 +121,40 @@ function readForm() {
   return raw;
 }
 
+// "Something else?" entries live in a hidden field as "a; b; c" and show as removable chips.
+const customSpecs = () => ($("#otherSpecialization").value ? $("#otherSpecialization").value.split("; ") : []);
+
+function renderCustomSpecs() {
+  const list = customSpecs();
+  $("#customSpecs").replaceChildren(...list.map((text) => {
+    const remove = el("button", { type: "button", className: "chip-remove", textContent: "✕" });
+    remove.setAttribute("aria-label", `Remove ${text}`);
+    remove.addEventListener("click", () => setCustomSpecs(customSpecs().filter((x) => x !== text)));
+    return el("span", { className: "chip custom" }, el("span", { textContent: text }, remove));
+  }));
+  const full = list.length >= MAX_OTHER_SPECS;
+  $("#otherSpecInput").disabled = full;
+  $("#otherSpecInput").placeholder = full ? `You've added ${MAX_OTHER_SPECS}. Remove one to add another.` : "Something else? Type it and press Enter, e.g. fraud detection";
+}
+
+function setCustomSpecs(list) {
+  $("#otherSpecialization").value = cleanOtherSpecs(list.join("; "));
+  renderCustomSpecs();
+  store.set(STORE_KEY, readForm());
+}
+
+function addCustomSpec() {
+  const text = cleanText($("#otherSpecInput").value, 80);
+  $("#otherSpecInput").value = "";
+  if (text) setCustomSpecs([...customSpecs(), text]);
+}
+
 function restoreForm(raw) {
   if (!raw) return renderSpecs(null);
   for (const k of ["name", "otherSpecialization", "notes"]) if (raw[k]) form.elements[k].value = raw[k];
   renderSpecs(raw.role, raw.specializations || []);
+  $("#otherSpecialization").value = cleanOtherSpecs(raw.otherSpecialization);
+  renderCustomSpecs();
   for (const k of Object.keys(FIELDS)) {
     const vals = [].concat(raw[k] || []);
     form.querySelectorAll(`input[name="${k}"]`).forEach((i) => (i.checked = vals.includes(i.value)));
@@ -270,11 +300,6 @@ function enhance(frag) {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
   });
-
-  // Pin "Start this week" first so the next step is the first thing they see.
-  const items = [...out.querySelectorAll(".tl-item")];
-  const start = items.find((i) => /^Start this week/i.test(i.querySelector("h2").textContent));
-  if (start && items[0] !== start) items[0].before(start);
 
   for (const item of out.querySelectorAll(".tl-item")) {
     const title = item.querySelector("h2").textContent;
@@ -567,8 +592,12 @@ function init() {
   });
   // Enter in a text field shouldn't skip ahead or submit early.
   form.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && e.target.tagName === "INPUT") e.preventDefault();
+    if (e.key !== "Enter" || e.target.tagName !== "INPUT") return;
+    e.preventDefault();
+    if (e.target.id === "otherSpecInput") addCustomSpec();
   });
+  // Typed text isn't lost if they move on without pressing Enter.
+  $("#otherSpecInput").addEventListener("blur", addCustomSpec);
 
   $("#nextBtn").addEventListener("click", next);
   $("#backBtn").addEventListener("click", () => goTo(Math.max(0, current - 1)));

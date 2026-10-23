@@ -94,7 +94,9 @@
             <div class="q">
               <p class="q-label">Specializations that interest you <span class="opt">optional</span></p>
               <div class="chips" id="specs"></div>
-              <input class="text" id="otherSpecialization" name="otherSpecialization" maxlength="120" placeholder="Something else? e.g. healthcare NLP, fraud detection" />
+              <input class="text" id="otherSpecInput" maxlength="80" autocomplete="off" placeholder="Something else? Type it and press Enter, e.g. fraud detection" aria-label="Add another specialization" />
+              <input type="hidden" id="otherSpecialization" name="otherSpecialization" />
+              <div class="chips custom-specs" id="customSpecs" aria-live="polite"></div>
             </div>
             <div class="q" data-field="hours"></div>
             <div class="q" data-field="style"></div>

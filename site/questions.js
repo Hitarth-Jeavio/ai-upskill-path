@@ -217,6 +217,18 @@ const pickOne = (field, v) => (FIELDS[field].options.some((o) => o.value === v) 
 const pickMany = (field, arr) =>
   Array.isArray(arr) ? [...new Set(arr)].filter((v) => FIELDS[field].options.some((o) => o.value === v)) : [];
 const clip = (s, n = MAX_TEXT) => (typeof s === "string" ? s.trim().slice(0, n) : "");
+// Free text becomes one plain line: no control characters, markdown or angle brackets that could reshape the prompt.
+export const cleanText = (s, n = MAX_TEXT) =>
+  clip(typeof s === "string" ? s.replace(/<[^>]*>/g, " ").replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/[<>`*_#|[\]{}\\]/g, "").replace(/\s+/g, " ") : "", n);
+export const MAX_OTHER_SPECS = 3;
+// "Something else?" entries: up to 3, each short, no duplicates; stored as one "; "-separated string.
+export const cleanOtherSpecs = (s) => {
+  const seen = new Map();
+  for (const x of (typeof s === "string" ? s.split(";") : []).map((v) => cleanText(v, 80)).filter(Boolean)) {
+    if (!seen.has(x.toLowerCase())) seen.set(x.toLowerCase(), x);
+  }
+  return [...seen.values()].slice(0, MAX_OTHER_SPECS).join("; ");
+};
 
 // Drops unknown fields and values, so arbitrary input never reaches the prompt.
 // Rung 3 (Enable your team) only applies to leads and above.
@@ -226,7 +238,7 @@ const TEAM_RUNG_ITEMS = EXPOSURE.flatMap((g) => g.items).filter((i) => i.rung ==
 
 export function normalizeProfile(raw = {}) {
   const p = {
-    name: clip(raw.name, 60),
+    name: cleanText(raw.name, 60),
     experience: pickOne("experience", raw.experience),
     role: pickOne("role", raw.role),
     scope: pickOne("scope", raw.scope),
@@ -234,12 +246,12 @@ export function normalizeProfile(raw = {}) {
     python: pickOne("python", raw.python),
     exposure: pickMany("exposure", raw.exposure),
     specializations: pickMany("specializations", raw.specializations),
-    otherSpecialization: clip(raw.otherSpecialization, 120),
+    otherSpecialization: cleanOtherSpecs(raw.otherSpecialization),
     cloud: pickMany("cloud", raw.cloud),
     goal: pickOne("goal", raw.goal),
     hours: pickOne("hours", raw.hours),
     style: pickMany("style", raw.style),
-    notes: clip(raw.notes),
+    notes: cleanText(raw.notes),
   };
   if (!teamRungApplies(p)) p.exposure = p.exposure.filter((v) => !TEAM_RUNG_ITEMS.includes(v));
   // Working in Python means they know it; the Python question doesn't apply.

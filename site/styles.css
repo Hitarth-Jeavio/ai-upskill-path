@@ -139,7 +139,12 @@ a { color: inherit; }
   background: #fff; border: 1px solid var(--chip-border); border-radius: var(--radius); padding: 12px 14px;
 }
 .text:focus { outline: 2px solid var(--teal); outline-offset: 1px; border-color: var(--teal); }
-#otherSpecialization { margin-top: 14px; }
+#otherSpecInput { margin-top: 14px; }
+.custom-specs { margin-top: 10px; }
+.custom-specs:empty { display: none; }
+.chip.custom > span { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); border-color: var(--ink); color: var(--cream); }
+.chip-remove { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 12px; padding: 0 2px; line-height: 1; }
+.chip-remove:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 textarea.text { resize: vertical; }
 
 .exp-group { margin-bottom: 26px; }
